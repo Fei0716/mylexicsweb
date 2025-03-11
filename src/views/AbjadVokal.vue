@@ -1,13 +1,13 @@
 <script setup>
-import { onMounted,onUnmounted, ref } from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import router from '../router.js';
 import ModalContinue from "../components/ModalContinue.vue";
+import ModalYouSure from "../components/ModalYouSure.vue";
+import Loader from "../components/Loader.vue";
 // States
 let canvas;
 let stage;
 let queue;
-let targetWidth = 1000;
-let targetHeight = 675;
 let playingSound = null;
 let playingAnimation = null;
 let displayedVokalButtons = [];
@@ -15,6 +15,14 @@ let displayedImage = null;
 let displayedText = null;
 let currentPage = 1;
 let showModalContinue = ref(false);
+let showModalYouSure = ref(false);
+let isLoading = ref(true);
+let isMobile = computed(()=>{
+  return  window.innerWidth < 1000 && window.innerWidth < window.innerHeight;
+});
+let targetWidth = isMobile.value ? 675: 1000;
+let targetHeight = isMobile.value ? 800 : 675;
+const dpr = window.devicePixelRatio || 1;
 // objects
 let kenaliBackgroundImg;
 let kenaliVokalTitleImg;
@@ -73,7 +81,14 @@ function init() {
 
   stage = new createjs.Stage(canvas);
   stage.snapToPixelEnabled = true;
-  stage.enableMouseOver(1000);//to enable mouseover
+  if (createjs.Touch.isSupported()) {
+    createjs.Touch.enable(stage);
+    stage.enableMouseOver(0); // Disable mouseover for touch devices
+  } else {
+    stage.enableMouseOver(1000); // Keep it for desktop
+  }
+  stage.canvas.width = Math.round(dpr * targetWidth);
+  stage.canvas.height  = Math.round(dpr * targetHeight);
 
   queue = new createjs.LoadQueue();
   queue.installPlugin(createjs.Sound);
@@ -84,6 +99,7 @@ function init() {
     {id: "title_kenali_vokal", src: "/images/title_kenali_vokal.png"},
     {id: "tv", src: "/images/tv_1.png"},
     {id: "guide", src: "/images/guide.png"},
+    {id: "arahan_vokal_animation", src: "/images/arahan_vokal_animation.png"},
 
     {id: "btn_home_01", src: "/images/btn_home_01.png"},
     {id: "btn_home_02", src: "/images/btn_home_02.png"},
@@ -180,6 +196,8 @@ function init() {
     {id: "sound_keluar", src: "/sounds/keluar.mp3"},
     {id: "sound_submenu", src: "/sounds/submenu.mp3"},
     {id: "sound_bantuan", src: "/sounds/bantuan.mp3"},
+    {id: "sound_arahan", src: "/sounds/vokal/arahan.mp3"},
+    {id: "sound_ingin_teruskan", src: "/sounds/ingin_teruskan.mp3"},
 
     {id: "sound_a", src: "/sounds/vokal/a.mp3"},
     {id: "sound_api", src: "/sounds/vokal/api.mp3"},
@@ -213,6 +231,7 @@ function init() {
 }
 
 function handleComplete() {
+  isLoading.value = false;
   loadScene();
   createjs.Ticker.addEventListener("tick", handleTick);
 }
@@ -233,16 +252,16 @@ function loadScene(){
   kenaliBackgroundImg.regY = kenaliBackgroundImg.image.height / 2;
   // Position it centered horizontally and slightly above the bottom
   kenaliBackgroundImg.x = canvas.width / 2;
-  kenaliBackgroundImg.y = canvas.height - (kenaliBackgroundImg.image.height * 0.35) / 2 + 20 ; // Adjust this value if needed
+  kenaliBackgroundImg.y = canvas.height * .45 ; // Adjust this value if needed
   // Scale it properly
-  kenaliBackgroundImg.scaleX = kenaliBackgroundImg.scaleY = 0.4;
+  kenaliBackgroundImg.scaleX = kenaliBackgroundImg.scaleY = isMobile.value ? 0.45 * dpr :0.4 * dpr;
   stage.addChild(kenaliBackgroundImg); // Green background on top
 
   kenaliVokalTitleImg = new createjs.Bitmap(queue.getResult("title_kenali_vokal"));
   kenaliVokalTitleImg.regX = kenaliVokalTitleImg.image.width / 2;
-  kenaliVokalTitleImg.x = canvas.width / 2 - 100;
-  kenaliVokalTitleImg.y = 10;
-  kenaliVokalTitleImg.scale = .35;
+  kenaliVokalTitleImg.x = canvas.width / 2 ;
+  kenaliVokalTitleImg.y = canvas.height * .01;
+  kenaliVokalTitleImg.scale = isMobile.value ? .3 * dpr: .35 * dpr;
   stage.addChild(kenaliVokalTitleImg);
 
 
@@ -251,10 +270,10 @@ function loadScene(){
   tvImg.regX = tvImg.image.width / 2;
   tvImg.regY = tvImg.image.height / 2;
   // Position it centered horizontally and slightly above the bottom
-  tvImg.x = canvas.width / 2 -100;
-  tvImg.y = canvas.height - (tvImg.image.height * 0.35) / 2 - 10 ; // Adjust this value if needed
+  tvImg.x = isMobile.value ? canvas.width * .43 :canvas.width / 2;
+  tvImg.y = isMobile.value ?canvas.height * .57 :canvas.height * .6; // Adjust this value if needed
   // Scale it properly
-  tvImg.scaleX = tvImg.scaleY = 0.35;
+  tvImg.scaleX = tvImg.scaleY = isMobile.value ? 0.3 * dpr : 0.35 * dpr;
   stage.addChild(tvImg); // Green background on top
 
 
@@ -263,19 +282,13 @@ function loadScene(){
   guideImg.regX = guideImg.image.width / 2;
   guideImg.regY = guideImg.image.height / 2;
   // Position it centered horizontally and slightly above the bottom
-  guideImg.x = canvas.width / 2 -100;
-  guideImg.y = canvas.height - (guideImg.image.height * 0.35) / 2 - 75 ; // Adjust this value if needed
+  guideImg.x = isMobile.value ? canvas.width * .45 : canvas.width * .53;
+  guideImg.y = isMobile.value ? canvas.height * .6: canvas.height * .63 ; // Adjust this value if needed
   // Scale it properly
-  guideImg.scaleX = guideImg.scaleY = 0.35;
+  guideImg.scaleX = guideImg.scaleY = isMobile.value ? 0.3 * dpr : 0.35 * dpr;
   stage.addChild(guideImg); // Green background on top
 
 
-  kenaliVokalTitleImg = new createjs.Bitmap(queue.getResult("title_kenali_vokal"));
-  kenaliVokalTitleImg.regX = kenaliVokalTitleImg.image.width / 2;
-  kenaliVokalTitleImg.x = canvas.width / 2 - 100;
-  kenaliVokalTitleImg.y = 10;
-  kenaliVokalTitleImg.scale = .35;
-  stage.addChild(kenaliVokalTitleImg);
 
 
   let btnHomeSpriteSheet = new createjs.SpriteSheet({
@@ -294,9 +307,9 @@ function loadScene(){
   btnHome.mouseEnabled = true;
   btnHome.mouseChildren = true;
   btnHome.cursor = "pointer";
-  btnHome.y = 20;
-  btnHome.x = 20;
-  btnHome.scale = .4; // Apply scaling
+  btnHome.y = canvas.height * 0.02;
+  btnHome.x = canvas.width * 0.04;
+  btnHome.scale = isMobile.value ? .3 * dpr : .4 * dpr; // Apply scaling
 
 
   // Add event listeners for hover and click
@@ -344,10 +357,9 @@ function loadScene(){
   btnSubmenu.mouseEnabled = true;
   btnSubmenu.mouseChildren = true;
   btnSubmenu.cursor = "pointer";
-  btnSubmenu.y = 20;
-  btnSubmenu.x = canvas.width - 360;
-  btnSubmenu.scale = .38; // Apply scaling
-
+  btnSubmenu.y = canvas.height * 0.02;
+  btnSubmenu.x = canvas.width * .85;
+  btnSubmenu.scale = isMobile.value ? .32 * dpr : .38 * dpr; // Apply scaling
   // Add event listeners for hover and click
   btnSubmenu.on("mouseover", () => {
     btnSubmenu.gotoAndStop("hover");
@@ -395,7 +407,7 @@ function loadScene(){
   btnBantuan.cursor = "pointer";
   btnBantuan.y = 20;
   btnBantuan.x = canvas.width - 240;
-  btnBantuan.scale = .38; // Apply scaling
+  btnBantuan.scale = .38 * dpr; // Apply scaling
 
   // Add event listeners for hover and click
   btnBantuan.on("mouseover", () => {
@@ -422,7 +434,7 @@ function loadScene(){
     //navigate to the abjad page
     router.push({name: 'LamanUtama'});
   });
-  stage.addChild(btnBantuan);
+  // stage.addChild(btnBantuan);
 
 
   let btnKeluarSpriteSheet = new createjs.SpriteSheet({
@@ -466,24 +478,23 @@ function loadScene(){
       playingSound.stop();
       playingSound = null;
     }
-    //navigate to the abjad page
-    router.push({name: 'LamanUtama'});
+    showModalYouSure.value = true;
   });
-  stage.addChild(btnKeluar);
+  // stage.addChild(btnKeluar);
 
 
   btnArahan= new createjs.Bitmap(queue.getResult("btn_arahan"));
   // Position it centered horizontally and slightly above the bottom
-  btnArahan.y = 150;
-  btnArahan.x = canvas.width - 120;
+  btnArahan.y = canvas.height * .18;
+  btnArahan.x = isMobile.value ? canvas.width * .85 :canvas.width * 0.90;
   btnArahan.cursor = "pointer";
   // Scale it properly
-  btnArahan.scaleX = btnArahan.scaleY = 0.35;
+  btnArahan.scaleX = btnArahan.scaleY = isMobile.value ? .30 * dpr:  0.35 * dpr;
   stage.addChild(btnArahan); // Green background on top
-
-
+  btnArahan.on("click", () => {
+      playArahanAnimation();
+  });
   showAIEButtons();
-
   let btnNextSpriteSheet = new createjs.SpriteSheet({
     images: [
       queue.getResult("btn_next_01"), // Normal state
@@ -500,9 +511,9 @@ function loadScene(){
   btnNext.mouseEnabled = true;
   btnNext.mouseChildren = true;
   btnNext.cursor = "pointer";
-  btnNext.y = canvas.height - 120;
-  btnNext.x = canvas.width - 120;
-  btnNext.scale = .4; // Apply scaling
+  btnNext.y = canvas.height * .85;
+  btnNext.x = isMobile.value ? canvas.width * .5 :canvas.width * .9;
+  btnNext.scale = .4 * dpr; // Apply scaling
   // Add event listeners for hover and click
   btnNext.on("mouseover", () => {
     btnNext.gotoAndStop("hover");
@@ -512,7 +523,9 @@ function loadScene(){
   });
   btnNext.on("click", () => {
     btnNext.gotoAndStop("hover");
-
+    setTimeout(() => {
+      btnNext.gotoAndStop("normal");
+    }, 200);
     navigateToAnotherPage("next");
   });
 
@@ -539,9 +552,9 @@ function showAIEButtons(){
   btnA.mouseEnabled = true;
   btnA.mouseChildren = true;
   btnA.cursor = "pointer";
-  btnA.y = canvas.height / 2 - 100;
-  btnA.x = canvas.width - 250;
-  btnA.scale = .4; // Apply scaling
+  btnA.y = canvas.height * (isMobile.value ? .35 : .35);
+  btnA.x = isMobile.value ? canvas.width  * .85 :canvas.width  * .83;
+  btnA.scale = isMobile.value ? .35 * dpr: .4 * dpr; // Apply scaling
   // Add event listeners for hover and click
   btnA.on("mouseover", () => {
     btnA.gotoAndStop("hover");
@@ -552,6 +565,9 @@ function showAIEButtons(){
   });
   btnA.on("click", () => {
     btnA.gotoAndStop("hover");
+    setTimeout(() => {
+      btnA.gotoAndStop("normal");
+    }, 200);
     //if there is animation playing,stop the playing animation
     if(playingAnimation){
       playingAnimation.gotoAndPlay("stop");
@@ -584,9 +600,9 @@ function showAIEButtons(){
   btnI.mouseEnabled = true;
   btnI.mouseChildren = true;
   btnI.cursor = "pointer";
-  btnI.y = canvas.height / 2;
-  btnI.x = canvas.width - 250;
-  btnI.scale = .4; // Apply scaling
+  btnI.y = canvas.height * (isMobile.value ? .47: .5);
+  btnI.x = isMobile.value ? canvas.width  * .85 :canvas.width  * .83;
+  btnI.scale = isMobile.value ? .35 * dpr: .4 * dpr; // Apply scaling
   // Add event listeners for hover and click
   btnI.on("mouseover", () => {
     btnI.gotoAndStop("hover");
@@ -596,6 +612,9 @@ function showAIEButtons(){
   });
   btnI.on("click", () => {
     btnI.gotoAndStop("hover");
+    setTimeout(() => {
+      btnI.gotoAndStop("normal");
+    }, 200);
     //if there is animation playing,stop the playing animation
     if(playingAnimation){
       playingAnimation.gotoAndPlay("stop");
@@ -629,9 +648,9 @@ function showAIEButtons(){
   btnU.mouseEnabled = true;
   btnU.mouseChildren = true;
   btnU.cursor = "pointer";
-  btnU.y = canvas.height / 2 + 100;
-  btnU.x = canvas.width - 250;
-  btnU.scale = .4; // Apply scaling
+  btnU.y = canvas.height * (isMobile.value ? .59: .65);
+  btnU.x = isMobile.value ? canvas.width  * .85 :canvas.width  * .83;
+  btnU.scale = isMobile.value ? .35 * dpr: .4 * dpr; // Apply scaling
   // Add event listeners for hover and click
   btnU.on("mouseover", () => {
     btnU.gotoAndStop("hover");
@@ -640,6 +659,9 @@ function showAIEButtons(){
     btnU.gotoAndStop("normal");
   });
   btnU.on("click", () => {
+    setTimeout(() => {
+      btnU.gotoAndStop("normal");
+    }, 200);
     btnU.gotoAndStop("hover");
     //if there is animation playing,stop the playing animation
     if(playingAnimation){
@@ -658,6 +680,71 @@ function showAIEButtons(){
   });
   stage.addChild(btnU);
 }
+function playArahanAnimation(){
+  /*
+  * To play the animation for arahan
+  * */
+  if(playingAnimation){
+    playingAnimation.gotoAndPlay("stop");
+    stage.removeChild(playingAnimation);
+    playingAnimation = null;
+  }
+  hideDisplayImageText();
+  hideDisplayVokalButtons();
+  hideLetterButtons();
+
+  let animationArahanSpriteSheet = new createjs.SpriteSheet({
+    images: [queue.getResult("arahan_vokal_animation")],
+    framerate: 30,
+    frames:[[0,0,557,337,0,26.150000000000006,133.9],[0,0,557,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[1100,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[557,0,543,337,0,26.150000000000006,133.9],[1643,0,528,337,0,26.150000000000006,133.9],[2171,0,513,337,0,26.150000000000006,133.9],[2684,0,501,337,0,26.150000000000006,133.9],[3185,0,501,337,0,26.150000000000006,133.9],[3686,0,501,337,0,26.150000000000006,133.9],[4187,0,501,337,0,26.150000000000006,133.9],[4688,0,501,337,0,26.150000000000006,133.9],[5189,0,501,337,0,26.150000000000006,133.9],[5690,0,501,337,0,26.150000000000006,133.9],[6191,0,501,337,0,26.150000000000006,133.9],[6692,0,501,337,0,26.150000000000006,133.9],[7193,0,501,337,0,26.150000000000006,133.9],[0,337,501,337,0,26.150000000000006,133.9],[501,337,501,337,0,26.150000000000006,133.9],[1002,337,501,337,0,26.150000000000006,133.9],[1503,337,501,337,0,26.150000000000006,133.9],[2004,337,501,337,0,26.150000000000006,133.9],[2004,337,501,337,0,26.150000000000006,133.9],[2004,337,501,337,0,26.150000000000006,133.9],[2004,337,501,337,0,26.150000000000006,133.9],[2505,337,501,337,0,26.150000000000006,133.9],[3006,337,501,337,0,26.150000000000006,133.9],[3507,337,501,337,0,26.150000000000006,133.9],[4008,337,501,337,0,26.150000000000006,133.9],[4509,337,501,337,0,26.150000000000006,133.9],[5010,337,501,337,0,26.150000000000006,133.9],[5511,337,501,337,0,26.150000000000006,133.9],[6012,337,501,337,0,26.150000000000006,133.9],[6513,337,501,337,0,26.150000000000006,133.9],[7014,337,501,337,0,26.150000000000006,133.9],[7515,337,501,337,0,26.150000000000006,133.9],[0,674,501,337,0,26.150000000000006,133.9],[501,674,501,337,0,26.150000000000006,133.9],[1002,674,501,337,0,26.150000000000006,133.9],[1503,674,501,337,0,26.150000000000006,133.9],[2004,674,501,337,0,26.150000000000006,133.9],[2505,674,501,337,0,26.150000000000006,133.9],[3006,674,501,337,0,26.150000000000006,133.9],[3507,674,501,337,0,26.150000000000006,133.9],[4008,674,501,337,0,26.150000000000006,133.9],[4509,674,501,337,0,26.150000000000006,133.9],[5010,674,501,337,0,26.150000000000006,133.9],[5511,674,501,337,0,26.150000000000006,133.9],[6012,674,501,337,0,26.150000000000006,133.9],[6513,674,501,340,0,26.150000000000006,133.9],[7014,674,501,348,0,26.150000000000006,133.9],[7515,674,501,355,0,26.150000000000006,133.9],[0,1029,501,361,0,26.150000000000006,133.9],[501,1029,501,366,0,26.150000000000006,133.9],[1002,1029,501,372,0,26.150000000000006,133.9],[1503,1029,501,376,0,26.150000000000006,133.9],[2004,1029,501,380,0,26.150000000000006,133.9],[2505,1029,501,381,0,26.150000000000006,133.9],[3006,1029,501,380,0,26.150000000000006,133.9],[3507,1029,501,383,0,26.150000000000006,133.9],[4008,1029,501,383,0,26.150000000000006,133.9],[4509,1029,501,383,0,26.150000000000006,133.9],[5010,1029,501,383,0,26.150000000000006,133.9],[5511,1029,501,383,0,26.150000000000006,133.9],[6012,1029,501,381,0,26.150000000000006,133.9],[6513,1029,501,376,0,26.150000000000006,133.9],[7014,1029,501,371,0,26.150000000000006,133.9],[7515,1029,501,364,0,26.150000000000006,133.9],[0,1412,501,357,0,26.150000000000006,133.9],[501,1412,501,352,0,26.150000000000006,133.9],[1002,1412,501,346,0,26.150000000000006,133.9],[1002,1412,501,346,0,26.150000000000006,133.9],[1503,1412,501,337,0,26.150000000000006,133.9],[2004,1412,501,337,0,26.150000000000006,133.9],[2505,1412,501,337,0,26.150000000000006,133.9],[3006,1412,501,337,0,26.150000000000006,133.9],[3507,1412,501,337,0,26.150000000000006,133.9],[4008,1412,501,337,0,26.150000000000006,133.9],[4509,1412,501,337,0,26.150000000000006,133.9],[5010,1412,501,337,0,26.150000000000006,133.9],[5511,1412,501,337,0,26.150000000000006,133.9],[6012,1412,501,347,0,26.150000000000006,133.9],[6513,1412,501,357,0,26.150000000000006,133.9],[7014,1412,501,366,0,26.150000000000006,133.9],[7515,1412,501,376,0,26.150000000000006,133.9],[0,1788,501,386,0,26.150000000000006,133.9],[501,1788,501,386,0,26.150000000000006,133.9],[1002,1788,501,386,0,26.150000000000006,133.9],[1503,1788,501,386,0,26.150000000000006,133.9],[2004,1788,501,386,0,26.150000000000006,133.9],[2505,1788,501,386,0,26.150000000000006,133.9],[3006,1788,501,386,0,26.150000000000006,133.9],[3507,1788,502,337,0,27.150000000000006,133.9],[4009,1788,501,357,0,26.150000000000006,153.9],[4510,1788,501,377,0,26.150000000000006,173.9],[5011,1788,501,397,0,26.150000000000006,193.9],[5512,1788,501,397,0,26.150000000000006,193.9],[6013,1788,549,397,0,74.15,193.9],[6562,1788,549,397,0,74.15,193.9],[7111,1788,549,397,0,74.15,193.9],[0,2185,549,397,0,74.15,193.9],[549,2185,549,397,0,74.15,193.9],[1098,2185,549,397,0,74.15,193.9],[1647,2185,549,397,0,74.15,193.9],[2196,2185,549,397,0,74.15,193.9],[2745,2185,549,397,0,74.15,193.9],[2745,2185,549,397,0,74.15,193.9],[2745,2185,549,397,0,74.15,193.9],[2745,2185,549,397,0,74.15,193.9],[2745,2185,549,397,0,74.15,193.9],[2745,2185,549,397,0,74.15,193.9],[3294,2185,549,397,0,74.15,193.9],[3843,2185,549,397,0,74.15,193.9],[4392,2185,549,397,0,74.15,193.9],[4941,2185,549,397,0,74.15,193.9],[5490,2185,549,397,0,74.15,193.9],[6039,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[6588,2185,549,397,0,74.15,193.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9],[7137,2185,66,60,0,-408.85,78.9]],
+    animations: {
+      run: [0,180, "end"],
+      end: [180, 180],
+      stop: [0]
+    }
+  });
+  let animationVokalArahan= new createjs.Sprite(animationArahanSpriteSheet);
+  animationVokalArahan.x =  isMobile.value ? canvas.width * .19 : canvas.width * .31;
+  animationVokalArahan.y = isMobile.value ? canvas.height * .54 :  canvas.height * .55 ; // Adjust this value if needed
+  animationVokalArahan.scale = isMobile.value ? 1.11 * dpr : 1.3* dpr;
+  animationVokalArahan.on("animationend", ()=> {
+    stage.removeChild(animationVokalArahan);
+    //enable back mouse event when animation ends
+    stage.children.forEach(child => {
+      child.mouseEnabled = true;
+    });
+    showLetterButtons();
+  });
+  stage.addChild(animationVokalArahan);
+  animationVokalArahan.gotoAndPlay("run");
+  playSound("sound_arahan");
+  //disable mouse event when animation starts
+  stage.children.forEach(child => {
+    child.mouseEnabled = false;
+  });
+}
+function hideLetterButtons(){
+  if(currentPage === 1){
+    stage.removeChild(btnA);
+    stage.removeChild(btnI);
+    stage.removeChild(btnU);
+  }else if(currentPage === 2){
+    stage.removeChild(btnE1);
+    stage.removeChild(btnE2);
+    stage.removeChild(btnO);
+  }
+}
+function showLetterButtons(){
+  if(currentPage === 1){
+    stage.addChild(btnA);
+    stage.addChild(btnI);
+    stage.addChild(btnU);
+  }else if(currentPage === 2){
+    stage.addChild(btnE1);
+    stage.addChild(btnE2);
+    stage.addChild(btnO);
+  }
+}
 function initAnimations(){
   // initialize animations
   let animationASpriteSheet = new createjs.SpriteSheet({
@@ -671,9 +758,9 @@ function initAnimations(){
     }
   });
   animationVokalA= new createjs.Sprite(animationASpriteSheet);
-  animationVokalA.x =  canvas.width / 2 - 285;
-  animationVokalA.y = canvas.height / 2 + 30 ; // Adjust this value if needed
-  animationVokalA.scale = 1.3;
+  animationVokalA.x =  canvas.width * (isMobile.value ? .19  : .31);
+  animationVokalA.y = canvas.height * (isMobile.value ? .54 :.55); // Adjust this value if needed
+  animationVokalA.scale = (isMobile.value ? 1.15 :1.3) * dpr;
   animationVokalA.on("animationend", ()=> {handleAnimationEnd("a")});
 
   let animationISpriteSheet = new createjs.SpriteSheet({
@@ -687,9 +774,9 @@ function initAnimations(){
     }
   });
   animationVokalI= new createjs.Sprite(animationISpriteSheet);
-  animationVokalI.x =  canvas.width / 2 - 300;
-  animationVokalI.y = canvas.height / 2 + 26 ; // Adjust this value if needed
-  animationVokalI.scale = 1.3;
+  animationVokalI.x =  canvas.width * (isMobile.value ? .17  : .3)
+  animationVokalI.y = canvas.height * (isMobile.value ? .53 :.55);// Adjust this value if needed
+  animationVokalI.scale = (isMobile.value ? 1.15 :1.3) * dpr;
   animationVokalI.on("animationend", ()=> {handleAnimationEnd("i")});
 
 
@@ -704,9 +791,9 @@ function initAnimations(){
     }
   });
   animationVokalU= new createjs.Sprite(animationUSpriteSheet);
-  animationVokalU.x =  canvas.width / 2 + 80;
-  animationVokalU.y = canvas.height / 2 + 320; // Adjust this value if needed
-  animationVokalU.scale = 1.3;
+  animationVokalU.x =  canvas.width * (isMobile.value ? .67 : .68);
+  animationVokalU.y = canvas.height * (isMobile.value ? .86 :.98); // Adjust this value if needed
+  animationVokalU.scale = (isMobile.value ? 1.15 :1.3) * dpr;
   animationVokalU.on("animationend", ()=> {handleAnimationEnd("u")});
 
 
@@ -721,9 +808,9 @@ function initAnimations(){
     }
   });
   animationVokalE1= new createjs.Sprite(animationE1SpriteSheet);
-  animationVokalE1.x =  200 ;
-  animationVokalE1.y = canvas.height / 2 + 26; // Adjust this value if needed
-  animationVokalE1.scale = 1.30;
+  animationVokalE1.x = canvas.width * (isMobile.value ? .17  : .3);
+  animationVokalE1.y = canvas.height * (isMobile.value ? .53 :.55);;// Adjust this value if needed
+  animationVokalE1.scale = (isMobile.value ? 1.15 :1.3) * dpr;
   animationVokalE1.on("animationend", ()=> {handleAnimationEnd("e1")});
 
 
@@ -738,9 +825,9 @@ function initAnimations(){
     }
   });
   animationVokalE2= new createjs.Sprite(animationE2SpriteSheet);
-  animationVokalE2.x =  200 ;
-  animationVokalE2.y = canvas.height / 2 + 26; // Adjust this value if needed
-  animationVokalE2.scale = 1.30;
+  animationVokalE2.x =  canvas.width * (isMobile.value ? .17 :.3);
+  animationVokalE2.y =  canvas.height * (isMobile.value ? .53 :.55); // Adjust this value if needed
+  animationVokalE2.scale = (isMobile.value ? 1.15 :1.3) * dpr;
   animationVokalE2.on("animationend", ()=> {handleAnimationEnd("e2")});
 
 
@@ -755,9 +842,9 @@ function initAnimations(){
     }
   });
   animationVokalO= new createjs.Sprite(animationOSpriteSheet);
-  animationVokalO.x =  200 ;
-  animationVokalO.y = canvas.height / 2 + 26; // Adjust this value if needed
-  animationVokalO.scale = 1.30;
+  animationVokalO.x =  canvas.width * (isMobile.value ? .17  : .3);
+  animationVokalO.y = canvas.height * (isMobile.value ? .53 :.55); // Adjust this value if needed
+  animationVokalO.scale = (isMobile.value ? 1.15 :1.3) * dpr;
   animationVokalO.on("animationend", ()=> {handleAnimationEnd("o")});
 }
 function handleAnimationEnd(letter){
@@ -782,9 +869,9 @@ function handleAnimationEnd(letter){
       btnApi.mouseEnabled = true;
       btnApi.mouseChildren = true;
       btnApi.cursor = "pointer";
-      btnApi.y = canvas.height/2;
-      btnApi.x = 110;
-      btnApi.scale = .3; // Apply scaling
+      btnApi.y = isMobile.value ? canvas.height * .43 :canvas.height/2;
+      btnApi.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnApi.scale = isMobile.value ? .25 * dpr : .3 * dpr; // Apply scaling
       // Add event listeners for hover and click
       btnApi.on("mouseover", () => {
         btnApi.gotoAndStop("hover");
@@ -794,6 +881,9 @@ function handleAnimationEnd(letter){
       });
       btnApi.on("click", () => {
         btnApi.gotoAndStop("hover");
+        setTimeout(() => {
+          btnApi.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("api")
         playSound("sound_api");
       });
@@ -816,9 +906,9 @@ function handleAnimationEnd(letter){
       btnAwan.mouseEnabled = true;
       btnAwan.mouseChildren = true;
       btnAwan.cursor = "pointer";
-      btnAwan.y = canvas.height/2 + 70;
-      btnAwan.x = 110;
-      btnAwan.scale = .3; // Apply scaling
+      btnAwan.y =  isMobile.value ? canvas.height * .51 : canvas.height * .61;
+      btnAwan.x =  isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnAwan.scale = isMobile.value ? .25 * dpr : .3 * dpr;// Apply scaling
       // Add event listeners for hover and click
       btnAwan.on("mouseover", () => {
         btnAwan.gotoAndStop("hover");
@@ -828,6 +918,9 @@ function handleAnimationEnd(letter){
       });
       btnAwan.on("click", () => {
         btnAwan.gotoAndStop("hover");
+        setTimeout(() => {
+          btnAwan.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("awan")
         playSound("sound_awan");
 
@@ -851,9 +944,10 @@ function handleAnimationEnd(letter){
       btnAyam.mouseEnabled = true;
       btnAyam.mouseChildren = true;
       btnAyam.cursor = "pointer";
-      btnAyam.y = canvas.height/2 + 140;
-      btnAyam.x = 110;
-      btnAyam.scale = .3; // Apply scaling
+      btnAyam.y = isMobile.value ? canvas.height * .59 :canvas.height * .72;
+      btnAyam.x =  isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnAyam.scale = isMobile.value ? .25 * dpr : .3 * dpr;// Apply scaling
+
       // Add event listeners for hover and click
       btnAyam.on("mouseover", () => {
         btnAyam.gotoAndStop("hover");
@@ -863,6 +957,9 @@ function handleAnimationEnd(letter){
       });
       btnAyam.on("click", () => {
         btnAyam.gotoAndStop("hover");
+        setTimeout(() => {
+          btnAyam.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("ayam");
         playSound("sound_ayam");
 
@@ -892,9 +989,9 @@ function handleAnimationEnd(letter){
       btnIbu.mouseEnabled = true;
       btnIbu.mouseChildren = true;
       btnIbu.cursor = "pointer";
-      btnIbu.y = canvas.height/2;
-      btnIbu.x = 110;
-      btnIbu.scale = .3; // Apply scaling
+      btnIbu.y = isMobile.value ? canvas.height * .43 :canvas.height/2;
+      btnIbu.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnIbu.scale = isMobile.value ? .25 * dpr : .3 * dpr;   // Apply scaling
       // Add event listeners for hover and click
       btnIbu.on("mouseover", () => {
         btnIbu.gotoAndStop("hover");
@@ -904,6 +1001,9 @@ function handleAnimationEnd(letter){
       });
       btnIbu.on("click", () => {
         btnIbu.gotoAndStop("hover");
+        setTimeout(() => {
+          btnIbu.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("ibu");
         playSound("sound_ibu");
 
@@ -927,9 +1027,9 @@ function handleAnimationEnd(letter){
       btnIkan.mouseEnabled = true;
       btnIkan.mouseChildren = true;
       btnIkan.cursor = "pointer";
-      btnIkan.y = canvas.height/2 + 70;
-      btnIkan.x = 110;
-      btnIkan.scale = .3; // Apply scaling
+      btnIkan.y = isMobile.value ? canvas.height * .51 : canvas.height * .61;
+      btnIkan.x =  isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnIkan.scale = isMobile.value ? .25 * dpr : .3 * dpr; // Apply scaling
       // Add event listeners for hover and click
       btnIkan.on("mouseover", () => {
         btnIkan.gotoAndStop("hover");
@@ -939,6 +1039,9 @@ function handleAnimationEnd(letter){
       });
       btnIkan.on("click", () => {
         btnIkan.gotoAndStop("hover");
+        setTimeout(() => {
+          btnIkan.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("ikan");
         playSound("sound_ikan");
 
@@ -962,9 +1065,9 @@ function handleAnimationEnd(letter){
       btnItik.mouseEnabled = true;
       btnItik.mouseChildren = true;
       btnItik.cursor = "pointer";
-      btnItik.y = canvas.height/2 + 140;
-      btnItik.x = 110;
-      btnItik.scale = .3; // Apply scaling
+      btnItik.y = isMobile.value ? canvas.height * .59 :canvas.height * .72;
+      btnItik.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnItik.scale = isMobile.value ? .25 * dpr : .3 * dpr;// Apply scaling
       // Add event listeners for hover and click
       btnItik.on("mouseover", () => {
         btnItik.gotoAndStop("hover");
@@ -974,6 +1077,9 @@ function handleAnimationEnd(letter){
       });
       btnItik.on("click", () => {
         btnItik.gotoAndStop("hover");
+        setTimeout(() => {
+          btnItik.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("itik");
         playSound("sound_itik");
 
@@ -1002,9 +1108,9 @@ function handleAnimationEnd(letter){
       btnUbi.mouseEnabled = true;
       btnUbi.mouseChildren = true;
       btnUbi.cursor = "pointer";
-      btnUbi.y = canvas.height/2;
-      btnUbi.x = 110;
-      btnUbi.scale = .3; // Apply scaling
+      btnUbi.y = isMobile.value ? canvas.height * .43 :canvas.height/2;
+      btnUbi.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnUbi.scale = isMobile.value ? .25 * dpr : .3 * dpr;  // Apply scaling
       // Add event listeners for hover and click
       btnUbi.on("mouseover", () => {
         btnUbi.gotoAndStop("hover");
@@ -1014,6 +1120,9 @@ function handleAnimationEnd(letter){
       });
       btnUbi.on("click", () => {
         btnUbi.gotoAndStop("hover");
+        setTimeout(() => {
+          btnUbi.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("ubi");
         playSound("sound_ubi");
 
@@ -1037,9 +1146,9 @@ function handleAnimationEnd(letter){
       btnUlar.mouseEnabled = true;
       btnUlar.mouseChildren = true;
       btnUlar.cursor = "pointer";
-      btnUlar.y = canvas.height/2 + 70;
-      btnUlar.x = 110;
-      btnUlar.scale = .3; // Apply scaling
+      btnUlar.y = isMobile.value ? canvas.height * .51 : canvas.height * .61;
+      btnUlar.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnUlar.scale = isMobile.value ? .25 * dpr : .3 * dpr;// Apply scaling
       // Add event listeners for hover and click
       btnUlar.on("mouseover", () => {
         btnUlar.gotoAndStop("hover");
@@ -1049,6 +1158,9 @@ function handleAnimationEnd(letter){
       });
       btnUlar.on("click", () => {
         btnUlar.gotoAndStop("hover");
+        setTimeout(() => {
+          btnUlar.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("ular");
         playSound("sound_ular");
 
@@ -1072,9 +1184,9 @@ function handleAnimationEnd(letter){
       btnUlat.mouseEnabled = true;
       btnUlat.mouseChildren = true;
       btnUlat.cursor = "pointer";
-      btnUlat.y = canvas.height/2 + 140;
-      btnUlat.x = 110;
-      btnUlat.scale = .3; // Apply scaling
+      btnUlat.y = isMobile.value ? canvas.height * .59 :canvas.height * .72;
+      btnUlat.x =  isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnUlat.scale = isMobile.value ? .25 * dpr : .2 * dpr; // Apply scaling
       // Add event listeners for hover and click
       btnUlat.on("mouseover", () => {
         btnUlat.gotoAndStop("hover");
@@ -1084,6 +1196,9 @@ function handleAnimationEnd(letter){
       });
       btnUlat.on("click", () => {
         btnUlat.gotoAndStop("hover");
+        setTimeout(() => {
+          btnUlat.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("ulat");
         playSound("sound_ulat");
 
@@ -1112,9 +1227,9 @@ function handleAnimationEnd(letter){
       btnEmak.mouseEnabled = true;
       btnEmak.mouseChildren = true;
       btnEmak.cursor = "pointer";
-      btnEmak.y = canvas.height/2;
-      btnEmak.x = 110;
-      btnEmak.scale = .3; // Apply scaling
+      btnEmak.y = isMobile.value ? canvas.height * .43 :canvas.height/2;
+      btnEmak.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnEmak.scale = isMobile.value ? .25 * dpr : .3 * dpr;// Apply scaling
       // Add event listeners for hover and click
       btnEmak.on("mouseover", () => {
         btnEmak.gotoAndStop("hover");
@@ -1124,6 +1239,9 @@ function handleAnimationEnd(letter){
       });
       btnEmak.on("click", () => {
         btnEmak.gotoAndStop("hover");
+        setTimeout(() => {
+          btnEmak.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("emak");
         playSound("sound_emak");
 
@@ -1147,9 +1265,9 @@ function handleAnimationEnd(letter){
       btnEmas.mouseEnabled = true;
       btnEmas.mouseChildren = true;
       btnEmas.cursor = "pointer";
-      btnEmas.y = canvas.height/2 + 70;
-      btnEmas.x = 110;
-      btnEmas.scale = .25; // Apply scaling
+      btnEmas.y = isMobile.value ? canvas.height * .51 : canvas.height * .61;
+      btnEmas.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnEmas.scale = .25 * dpr;// Apply scaling
       // Add event listeners for hover and click
       btnEmas.on("mouseover", () => {
         btnEmas.gotoAndStop("hover");
@@ -1159,6 +1277,9 @@ function handleAnimationEnd(letter){
       });
       btnEmas.on("click", () => {
         btnEmas.gotoAndStop("hover");
+        setTimeout(() => {
+          btnEmas.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("emas");
         playSound("sound_emas");
 
@@ -1182,9 +1303,9 @@ function handleAnimationEnd(letter){
       btnEnam.mouseEnabled = true;
       btnEnam.mouseChildren = true;
       btnEnam.cursor = "pointer";
-      btnEnam.y = canvas.height/2 + 140;
-      btnEnam.x = 110;
-      btnEnam.scale = .3; // Apply scaling
+      btnEnam.y = isMobile.value ? canvas.height * .59 :canvas.height * .72;
+      btnEnam.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnEnam.scale = isMobile.value ? .25 * dpr : .3 * dpr;// Apply scaling
       // Add event listeners for hover and click
       btnEnam.on("mouseover", () => {
         btnEnam.gotoAndStop("hover");
@@ -1194,6 +1315,9 @@ function handleAnimationEnd(letter){
       });
       btnEnam.on("click", () => {
         btnEnam.gotoAndStop("hover");
+        setTimeout(() => {
+          btnEnam.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("enam");
         playSound("sound_enam");
 
@@ -1222,9 +1346,9 @@ function handleAnimationEnd(letter){
       btnEkor.mouseEnabled = true;
       btnEkor.mouseChildren = true;
       btnEkor.cursor = "pointer";
-      btnEkor.y = canvas.height/2;
-      btnEkor.x = 110;
-      btnEkor.scale = .3; // Apply scaling
+      btnEkor.y = isMobile.value ? canvas.height * .43 :canvas.height/2;
+      btnEkor.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnEkor.scale = isMobile.value ? .25 * dpr : .3 * dpr;  // Apply scaling
       // Add event listeners for hover and click
       btnEkor.on("mouseover", () => {
         btnEkor.gotoAndStop("hover");
@@ -1234,6 +1358,9 @@ function handleAnimationEnd(letter){
       });
       btnEkor.on("click", () => {
         btnEkor.gotoAndStop("hover");
+        setTimeout(() => {
+          btnEkor.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("ekor");
         playSound("sound_ekor");
 
@@ -1257,9 +1384,9 @@ function handleAnimationEnd(letter){
       btnEpal.mouseEnabled = true;
       btnEpal.mouseChildren = true;
       btnEpal.cursor = "pointer";
-      btnEpal.y = canvas.height/2 + 70;
-      btnEpal.x = 110;
-      btnEpal.scale = .3; // Apply scaling
+      btnEpal.y = isMobile.value ? canvas.height * .51 : canvas.height * .61;
+      btnEpal.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnEpal.scale = isMobile.value ? .25 * dpr : .3 * dpr; // Apply scaling
       // Add event listeners for hover and click
       btnEpal.on("mouseover", () => {
         btnEpal.gotoAndStop("hover");
@@ -1269,6 +1396,9 @@ function handleAnimationEnd(letter){
       });
       btnEpal.on("click", () => {
         btnEpal.gotoAndStop("hover");
+        setTimeout(() => {
+          btnEpal.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("epal");
         playSound("sound_epal");
 
@@ -1296,9 +1426,9 @@ function handleAnimationEnd(letter){
       btnObor.mouseEnabled = true;
       btnObor.mouseChildren = true;
       btnObor.cursor = "pointer";
-      btnObor.y = canvas.height/2;
-      btnObor.x = 110;
-      btnObor.scale = .3; // Apply scaling
+      btnObor.y = isMobile.value ? canvas.height * .43 :canvas.height/2;
+      btnObor.x =  isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnObor.scale = isMobile.value ? .25 * dpr : .3 * dpr; // Apply scaling
       // Add event listeners for hover and click
       btnObor.on("mouseover", () => {
         btnObor.gotoAndStop("hover");
@@ -1308,6 +1438,9 @@ function handleAnimationEnd(letter){
       });
       btnObor.on("click", () => {
         btnObor.gotoAndStop("hover");
+        setTimeout(() => {
+          btnObor.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("obor");
         playSound("sound_obor");
 
@@ -1331,9 +1464,9 @@ function handleAnimationEnd(letter){
       btnOren.mouseEnabled = true;
       btnOren.mouseChildren = true;
       btnOren.cursor = "pointer";
-      btnOren.y = canvas.height/2 + 70;
-      btnOren.x = 110;
-      btnOren.scale = .3; // Apply scaling
+      btnOren.y = isMobile.value ? canvas.height * .51 : canvas.height * .61;
+      btnOren.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnOren.scale = isMobile.value ? .25 * dpr : .3 * dpr;// Apply scaling
       // Add event listeners for hover and click
       btnOren.on("mouseover", () => {
         btnOren.gotoAndStop("hover");
@@ -1343,6 +1476,9 @@ function handleAnimationEnd(letter){
       });
       btnOren.on("click", () => {
         btnOren.gotoAndStop("hover");
+        setTimeout(() => {
+          btnOren.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("oren");
         playSound("sound_oren");
 
@@ -1366,9 +1502,9 @@ function handleAnimationEnd(letter){
       btnOtak.mouseEnabled = true;
       btnOtak.mouseChildren = true;
       btnOtak.cursor = "pointer";
-      btnOtak.y = canvas.height/2 + 140;
-      btnOtak.x = 110;
-      btnOtak.scale = .3; // Apply scaling
+      btnOtak.y = isMobile.value ? canvas.height * .59 :canvas.height * .72;
+      btnOtak.x = isMobile.value ? canvas.width * .05  :  canvas.width * .2;
+      btnOtak.scale = isMobile.value ? .25 * dpr : .3 * dpr; // Apply scaling
       // Add event listeners for hover and click
       btnOtak.on("mouseover", () => {
         btnOtak.gotoAndStop("hover");
@@ -1378,6 +1514,9 @@ function handleAnimationEnd(letter){
       });
       btnOtak.on("click", () => {
         btnOtak.gotoAndStop("hover");
+        setTimeout(() => {
+          btnOtak.gotoAndStop("normal");
+        }, 200);
         displayImageTextOnTv("otak");
         playSound("sound_otak");
 
@@ -1423,18 +1562,19 @@ function displayImageTextOnTv(word){
   displayedImage  = new createjs.Bitmap(queue.getResult(`btn_${word}_01`));
   displayedImage.regX = displayedImage.image.width / 2;
   displayedImage.regY = displayedImage.image.height / 2;
-  displayedImage.x = canvas.width / 2 - 70;
-  displayedImage.y = canvas.width / 2 - 150;
+  displayedImage.x =  isMobile.value ? canvas.width * .47 :canvas.width * .5;
+  displayedImage.y =  isMobile.value ? canvas.height * .55   :canvas.height * .5 ;
   displayedImage.alpha = 0; // Initially hidden
+  displayedImage.scale = 1 * dpr;
   stage.addChild(displayedImage);
 
   displayedText  = new createjs.Bitmap(queue.getResult(`text_${word}`));
   displayedText.regX = displayedText.image.width / 2;
   displayedText.regY = displayedText.image.height / 2;
-  displayedText.x = canvas.width / 2 - 70;
-  displayedText.y = canvas.width / 2 ;
+  displayedText.x =  isMobile.value ? canvas.width * .47 :canvas.width * .5;
+  displayedText.y =  isMobile.value ?  canvas.height * .75 :canvas.height * .8;
   displayedText.alpha = 0; // Initially hidden
-  displayedText.scale = .4;
+  displayedText.scale =  isMobile.value ?  .3 * dpr : .35 * dpr;;
   stage.addChild(displayedText);
 
   // Apply fade-in animation (0 to 1 alpha in 1 second)
@@ -1476,9 +1616,9 @@ function navigateToAnotherPage(direction){
       btnE1.mouseEnabled = true;
       btnE1.mouseChildren = true;
       btnE1.cursor = "pointer";
-      btnE1.y = canvas.height / 2 - 100;
-      btnE1.x = canvas.width - 250;
-      btnE1.scale = .4; // Apply scaling
+      btnE1.y = canvas.height * (isMobile.value ? .35 : .35);
+      btnE1.x = isMobile.value ? canvas.width  * .85 :canvas.width  * .83;
+      btnE1.scale = isMobile.value ? .35 * dpr: .4 * dpr;// Apply scaling
       // Add event listeners for hover and click
       btnE1.on("mouseover", () => {
         btnE1.gotoAndStop("hover");
@@ -1489,6 +1629,9 @@ function navigateToAnotherPage(direction){
       });
       btnE1.on("click", () => {
         btnE1.gotoAndStop("hover");
+        setTimeout(() => {
+          btnE1.gotoAndStop("normal");
+        }, 200);
         //if there is animation playing,stop the playing animation
         if(playingAnimation){
           playingAnimation.gotoAndPlay("stop");
@@ -1521,9 +1664,9 @@ function navigateToAnotherPage(direction){
       btnE2.mouseEnabled = true;
       btnE2.mouseChildren = true;
       btnE2.cursor = "pointer";
-      btnE2.y = canvas.height / 2;
-      btnE2.x = canvas.width - 250;
-      btnE2.scale = .4; // Apply scaling
+      btnE2.y = canvas.height * (isMobile.value ? .47: .5);
+      btnE2.x = isMobile.value ? canvas.width  * .85 :canvas.width  * .83;
+      btnE2.scale =  isMobile.value ? .35 * dpr: .4 * dpr;// Apply scaling
       // Add event listeners for hover and click
       btnE2.on("mouseover", () => {
         btnE2.gotoAndStop("hover");
@@ -1533,6 +1676,9 @@ function navigateToAnotherPage(direction){
       });
       btnE2.on("click", () => {
         btnE2.gotoAndStop("hover");
+        setTimeout(() => {
+          btnE2.gotoAndStop("normal");
+        }, 200);
         //if there is animation playing,stop the playing animation
         if(playingAnimation){
           playingAnimation.gotoAndPlay("stop");
@@ -1565,9 +1711,9 @@ function navigateToAnotherPage(direction){
       btnO.mouseEnabled = true;
       btnO.mouseChildren = true;
       btnO.cursor = "pointer";
-      btnO.y = canvas.height / 2 + 100;
-      btnO.x = canvas.width - 250;
-      btnO.scale = .4; // Apply scaling
+      btnO.y = canvas.height * (isMobile.value ? .59: .65);
+      btnO.x = isMobile.value ? canvas.width  * .85 :canvas.width  * .83;
+      btnO.scale = isMobile.value ? .35 * dpr: .4 * dpr; // Apply scaling
       // Add event listeners for hover and click
       btnO.on("mouseover", () => {
         btnO.gotoAndStop("hover");
@@ -1577,6 +1723,9 @@ function navigateToAnotherPage(direction){
       });
       btnO.on("click", () => {
         btnO.gotoAndStop("hover");
+        setTimeout(() => {
+          btnO.gotoAndStop("normal");
+        }, 200);
         //if there is animation playing,stop the playing animation
         if(playingAnimation){
           playingAnimation.gotoAndPlay("stop");
@@ -1608,9 +1757,9 @@ function navigateToAnotherPage(direction){
       btnPrevious.mouseEnabled = true;
       btnPrevious.mouseChildren = true;
       btnPrevious.cursor = "pointer";
-      btnPrevious.y = canvas.height - 120;
-      btnPrevious.x = canvas.width - 240;
-      btnPrevious.scale = .4; // Apply scaling
+      btnPrevious.y = canvas.height * .85;
+      btnPrevious.x = isMobile.value ? canvas.width * .3 :canvas.width * .8;
+      btnPrevious.scale = .4* dpr; // Apply scaling
       // Add event listeners for hover and click
       btnPrevious.on("mouseover", () => {
         btnPrevious.gotoAndStop("hover");
@@ -1620,6 +1769,9 @@ function navigateToAnotherPage(direction){
       });
       btnPrevious.on("click", () => {
         btnPrevious.gotoAndStop("hover");
+        setTimeout(() => {
+          btnPrevious.gotoAndStop("normal");
+        }, 200);
         navigateToAnotherPage("previous");
       });
       stage.addChild(btnPrevious);
@@ -1691,6 +1843,10 @@ onUnmounted(() => {
   <Transition name="fade-in">
     <ModalContinue @hide="showModalContinue = false;" v-if="showModalContinue"></ModalContinue>
   </Transition>
+  <Transition name="fade-in">
+    <ModalYouSure @hide="showModalYouSure = false;" v-if="showModalYouSure"></ModalYouSure>
+  </Transition>
+  <Loader v-if="isLoading"></Loader>
 </template>
 
 <style scoped>

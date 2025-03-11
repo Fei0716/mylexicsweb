@@ -1,13 +1,12 @@
 <script setup>
-import {h, onMounted, onUnmounted, ref} from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import router from '../router.js';
 import ModalContinue from "../components/ModalContinue.vue";
+import Loader from "../components/Loader.vue";
 // States
 let canvas;
 let stage;
 let queue;
-let targetWidth = 1000;
-let targetHeight = 675;
 let playingSound = null;
 let playingAnimation = null;
 let displayedVokalButtons = [];
@@ -15,6 +14,13 @@ let displayedImage = null;
 let displayedText = null;
 let currentPage = 1;
 let showModalContinue = ref(false);
+let isLoading = ref(true);
+let isMobile = computed(()=>{
+  return  window.innerWidth < 1000 && window.innerWidth < window.innerHeight;
+});
+let targetWidth = isMobile.value ? 675: 1000;
+let targetHeight = isMobile.value ? 800 : 675;
+const dpr = window.devicePixelRatio || 1;
 let vokals = [
   {
     letter: "a",
@@ -71,7 +77,14 @@ function init() {
 
   stage = new createjs.Stage(canvas);
   stage.snapToPixelEnabled = true;
-  stage.enableMouseOver(1000);//to enable mouseover
+  if (createjs.Touch.isSupported()) {
+    createjs.Touch.enable(stage);
+    stage.enableMouseOver(0); // Disable mouseover for touch devices
+  } else {
+    stage.enableMouseOver(1000); // Keep it for desktop
+  }
+  stage.canvas.width = Math.round(dpr * targetWidth);
+  stage.canvas.height  = Math.round(dpr * targetHeight);
 
   queue = new createjs.LoadQueue();
   queue.installPlugin(createjs.Sound);
@@ -144,6 +157,7 @@ function init() {
 }
 
 function handleComplete() {
+  isLoading.value = false;
   loadScene();
   createjs.Ticker.addEventListener("tick", handleTick);
 }
@@ -164,16 +178,17 @@ function loadScene(){
   kenaliBackgroundImg.regY = kenaliBackgroundImg.image.height / 2;
   // Position it centered horizontally and slightly above the bottom
   kenaliBackgroundImg.x = canvas.width / 2;
-  kenaliBackgroundImg.y = canvas.height - (kenaliBackgroundImg.image.height * 0.35) / 2 + 20 ; // Adjust this value if needed
+  kenaliBackgroundImg.y = canvas.height * .45 ; // Adjust this value if needed
   // Scale it properly
-  kenaliBackgroundImg.scaleX = kenaliBackgroundImg.scaleY = 0.4;
+  kenaliBackgroundImg.scaleX = kenaliBackgroundImg.scaleY = isMobile.value ? 0.45 * dpr :0.4 * dpr;
   stage.addChild(kenaliBackgroundImg); // Green background on top
+
 
   kenaliVokalBergambarTitleImg = new createjs.Bitmap(queue.getResult("title_kenali_vokal_bergambar"));
   kenaliVokalBergambarTitleImg.regX = kenaliVokalBergambarTitleImg.image.width / 2;
-  kenaliVokalBergambarTitleImg.x = canvas.width / 2 - 100;
-  kenaliVokalBergambarTitleImg.y = 10;
-  kenaliVokalBergambarTitleImg.scale = .35;
+  kenaliVokalBergambarTitleImg.x = canvas.width / 2;
+  kenaliVokalBergambarTitleImg.y = canvas.height * .01;
+  kenaliVokalBergambarTitleImg.scale = isMobile.value ? .3 * dpr: .35 * dpr;
   stage.addChild(kenaliVokalBergambarTitleImg);
 
 
@@ -182,10 +197,10 @@ function loadScene(){
   tvImg.regX = tvImg.image.width / 2;
   tvImg.regY = tvImg.image.height / 2;
   // Position it centered horizontally and slightly above the bottom
-  tvImg.x = canvas.width / 2 ;
-  tvImg.y = canvas.height - (tvImg.image.height * 0.35) / 2 - 10 ; // Adjust this value if needed
+  tvImg.x = canvas.width / 2;
+  tvImg.y = isMobile.value ? canvas.height * .55  :canvas.height * .6; // Adjust this value if needed
   // Scale it properly
-  tvImg.scale= 0.35;
+  tvImg.scaleX = tvImg.scaleY = isMobile.value ? 0.3 * dpr : 0.35 * dpr;
   stage.addChild(tvImg); // Green background on top
 
 
@@ -206,9 +221,9 @@ function loadScene(){
   btnHome.mouseEnabled = true;
   btnHome.mouseChildren = true;
   btnHome.cursor = "pointer";
-  btnHome.y = 20;
-  btnHome.x = 20;
-  btnHome.scale = .4; // Apply scaling
+  btnHome.y = canvas.height * 0.02;
+  btnHome.x = canvas.width * 0.04;
+  btnHome.scale = isMobile.value ? .3 * dpr : .4 * dpr; // Apply scaling
 
 
   // Add event listeners for hover and click
@@ -256,9 +271,9 @@ function loadScene(){
   btnSubmenu.mouseEnabled = true;
   btnSubmenu.mouseChildren = true;
   btnSubmenu.cursor = "pointer";
-  btnSubmenu.y = 20;
-  btnSubmenu.x = canvas.width - 360;
-  btnSubmenu.scale = .38; // Apply scaling
+  btnSubmenu.y = canvas.height * 0.02;
+  btnSubmenu.x = canvas.width * .85;
+  btnSubmenu.scale = isMobile.value ? .32 * dpr : .38 * dpr;// Apply scaling
 
   // Add event listeners for hover and click
   btnSubmenu.on("mouseover", () => {
@@ -334,7 +349,7 @@ function loadScene(){
     //navigate to the abjad page
     router.push({name: 'LamanUtama'});
   });
-  stage.addChild(btnBantuan);
+  // stage.addChild(btnBantuan);
 
 
   let btnKeluarSpriteSheet = new createjs.SpriteSheet({
@@ -381,16 +396,16 @@ function loadScene(){
     //navigate to the abjad page
     router.push({name: 'LamanUtama'});
   });
-  stage.addChild(btnKeluar);
+  // stage.addChild(btnKeluar);
 
 
   btnArahan= new createjs.Bitmap(queue.getResult("btn_arahan"));
   // Position it centered horizontally and slightly above the bottom
-  btnArahan.y = 150;
-  btnArahan.x = canvas.width - 120;
+  btnArahan.y = canvas.height * .18;
+  btnArahan.x = isMobile.value ? canvas.width * .85 :canvas.width * 0.90;
   btnArahan.cursor = "pointer";
   // Scale it properly
-  btnArahan.scaleX = btnArahan.scaleY = 0.35;
+  btnArahan.scaleX = btnArahan.scaleY = isMobile.value ? .30 * dpr:  0.35 * dpr;
   btnArahan.on("click", () => {
     playSound("sound_klik_gambar");
   });
@@ -413,9 +428,9 @@ function loadScene(){
   btnNext.mouseEnabled = true;
   btnNext.mouseChildren = true;
   btnNext.cursor = "pointer";
-  btnNext.y = canvas.height - 120;
-  btnNext.x = canvas.width - 100;
-  btnNext.scale = .4; // Apply scaling
+  btnNext.y = canvas.height * .85;
+  btnNext.x = isMobile.value ? canvas.width * .55 :canvas.width * .9;
+  btnNext.scale = .4 * dpr; // Apply scaling
   // Add event listeners for hover and click
   btnNext.on("mouseover", () => {
     btnNext.gotoAndStop("hover");
@@ -425,7 +440,9 @@ function loadScene(){
   });
   btnNext.on("click", () => {
     btnNext.gotoAndStop("hover");
-
+    setTimeout(() => {
+      btnNext.gotoAndStop("normal");
+    }, 200);
     navigateToAnotherPage("next");
   });
 
@@ -450,9 +467,9 @@ function loadScene(){
   btnPrevious.mouseEnabled = true;
   btnPrevious.mouseChildren = true;
   btnPrevious.cursor = "pointer";
-  btnPrevious.y = canvas.height - 120;
-  btnPrevious.x = canvas.width - 200;
-  btnPrevious.scale = .4; // Apply scaling
+  btnPrevious.y = canvas.height * .85;
+  btnPrevious.x = isMobile.value ? canvas.width * .35 :canvas.width * .8;
+  btnPrevious.scale = .4* dpr; // Apply scaling
   // Add event listeners for hover and click
   btnPrevious.on("mouseover", () => {
     btnPrevious.gotoAndStop("hover");
@@ -462,6 +479,9 @@ function loadScene(){
   });
   btnPrevious.on("click", () => {
     btnPrevious.gotoAndStop("hover");
+    setTimeout(() => {
+      btnPrevious.gotoAndStop("normal");
+    }, 200);
     navigateToAnotherPage("previous");
   });
   stage.addChild(btnPrevious);
@@ -492,9 +512,9 @@ function loadAssets(letter, word, width, height){
   displayedImage.cursor = "pointer";
   displayedImage.regX = width / 2;
   displayedImage.regY = height / 2;
-  displayedImage.y = canvas.height / 2 + 20;
-  displayedImage.x = canvas.width / 2;
-  displayedImage.scale = .3; // Apply scaling
+  displayedImage.x = canvas.width * .5;
+  displayedImage.y = isMobile.value ? canvas.height * .5 : canvas.height * .55 ;
+  displayedImage.scale = isMobile.value ?  .25 * dpr :.3 * dpr; // Apply scaling
 
   // Add event listeners for hover and click
   displayedImage.on("mouseover", () => {
@@ -527,9 +547,9 @@ function displayImageTextOnTv(letter){
   displayedText.regX = displayedText.image.width / 2;
   displayedText.regY = displayedText.image.height / 2;
   displayedText.x = canvas.width / 2;
-  displayedText.y = canvas.width / 2 + 50 ;
+  displayedText.y = isMobile.value ?  canvas.height * .71: canvas.height  *  .85;
   displayedText.alpha = 0; // Initially hidden
-  displayedText.scale = .4;
+  displayedText.scale = .4* dpr;
   stage.addChild(displayedText);
 
   // Apply fade-in animation (0 to 1 alpha in 1 second)
@@ -624,6 +644,7 @@ onUnmounted(() => {
   <Transition name="fade-in">
     <ModalContinue @hide="showModalContinue = false;" v-if="showModalContinue"></ModalContinue>
   </Transition>
+  <Loader v-if="isLoading"></Loader>
 </template>
 
 <style scoped>

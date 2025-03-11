@@ -1,12 +1,12 @@
 <script setup>
-import { onMounted,onUnmounted } from 'vue';
+import {ref, onMounted, onUnmounted, computed} from 'vue';
 import router from '../router.js';
+import Loader from "../components/Loader.vue";
 // States
 let canvas;
 let stage;
 let queue;
-let targetWidth = 1000;
-let targetHeight = 675;
+const dpr = window.devicePixelRatio || 1;
 let playingSound = null;
 // objects
 let abjadBackgroundImg;
@@ -17,7 +17,12 @@ let btnVokal;
 let btnVokalBergambar;
 let btnKonsonan;
 let btnKonsonanBergambar;
-
+let isLoading = ref(true);
+let isMobile = computed(()=>{
+  return  window.innerWidth < 1000 && window.innerWidth < window.innerHeight;
+});
+let targetWidth = isMobile.value ? 675: 1000;
+let targetHeight = isMobile.value ? 800 : 675;
 function init() {
   //get DPI
   canvas = document.getElementById("canvas");
@@ -26,7 +31,14 @@ function init() {
 
   stage = new createjs.Stage(canvas);
   stage.snapToPixelEnabled = true;
-  stage.enableMouseOver(1000);//to enable mouseover
+  if (createjs.Touch.isSupported()) {
+    createjs.Touch.enable(stage);
+    stage.enableMouseOver(0); // Disable mouseover for touch devices
+  } else {
+    stage.enableMouseOver(1000); // Keep it for desktop
+  }
+  stage.canvas.width = Math.round(dpr * targetWidth);
+  stage.canvas.height  = Math.round(dpr * targetHeight);
 
   queue = new createjs.LoadQueue();
   queue.installPlugin(createjs.Sound);
@@ -60,6 +72,7 @@ function init() {
 }
 
 function handleComplete() {
+  isLoading.value = false;
   playingSound = createjs.Sound.play("sound_submenu_abjad");
   loadScene();
   createjs.Ticker.addEventListener("tick", handleTick);
@@ -81,16 +94,16 @@ function loadScene(){
   abjadBackgroundImg.regY = abjadBackgroundImg.image.height / 2;
   // Position it centered horizontally and slightly above the bottom
   abjadBackgroundImg.x = canvas.width / 2;
-  abjadBackgroundImg.y = canvas.height - (abjadBackgroundImg.image.height * 0.35) / 2 + 20 ; // Adjust this value if needed
+  abjadBackgroundImg.y = canvas.height * .45 ; // Adjust this value if needed
   // Scale it properly
-  abjadBackgroundImg.scaleX = abjadBackgroundImg.scaleY = 0.4;
+  abjadBackgroundImg.scaleX = abjadBackgroundImg.scaleY = isMobile.value ? .45* dpr:  0.4 * dpr;
   stage.addChild(abjadBackgroundImg); // Green background on top
 
   abjadTitleImg = new createjs.Bitmap(queue.getResult("title_abjad"));
   abjadTitleImg.regX = abjadTitleImg.image.width / 2;
   abjadTitleImg.x = canvas.width / 2;
-  abjadTitleImg.y = 10;
-  abjadTitleImg.scale = .35;
+  abjadTitleImg.y = canvas.height * .01;
+  abjadTitleImg.scale =  isMobile.value ? .3 * dpr: .35 * dpr;
   stage.addChild(abjadTitleImg);
 
   let btnHomeSpriteSheet = new createjs.SpriteSheet({
@@ -109,9 +122,9 @@ function loadScene(){
   btnHome.mouseEnabled = true;
   btnHome.mouseChildren = true;
   btnHome.cursor = "pointer";
-  btnHome.y = 20;
-  btnHome.x = 20;
-  btnHome.scale = .4; // Apply scaling
+  btnHome.y = canvas.height * .02;
+  btnHome.x = canvas.width * .02;
+  btnHome.scale = isMobile.value ? .3 * dpr : .4 * dpr;  // Apply scaling
 
 
   // Add event listeners for hover and click
@@ -159,9 +172,9 @@ function loadScene(){
   btnKeluar.mouseEnabled = true;
   btnKeluar.mouseChildren = true;
   btnKeluar.cursor = "pointer";
-  btnKeluar.y = 20;
-  btnKeluar.x = canvas.width - 120;
-  btnKeluar.scale = .3; // Apply scaling
+  btnKeluar.y = canvas.height * .02;
+  btnKeluar.x = canvas.width ;
+  btnKeluar.scale = .3 * dpr;// Apply scaling
 
   // Add event listeners for hover and click
   btnKeluar.on("mouseover", () => {
@@ -188,7 +201,7 @@ function loadScene(){
     //navigate to the abjad page
     router.push({name: 'LamanUtama'});
   });
-  stage.addChild(btnKeluar);
+  // stage.addChild(btnKeluar);
 
   let btnVokalSpriteSheet = new createjs.SpriteSheet({
     images: [
@@ -207,9 +220,9 @@ function loadScene(){
   btnVokal.mouseChildren = true;
   btnVokal.cursor = "pointer";
   btnVokal.regY = abjadTitleImg.image.height / 2;
-  btnVokal.y = canvas.height / 2 - 30;
-  btnVokal.x = 100;
-  btnVokal.scale = .3; // Apply scaling
+  btnVokal.y = canvas.height / 2 * .95;
+  btnVokal.x =  isMobile.value ? canvas.width * .01 : canvas.width * .15;
+  btnVokal.scale = .3 * dpr; // Apply scaling
 
 
   // Add event listeners for hover and click
@@ -256,9 +269,9 @@ function loadScene(){
   btnVokalBergambar.mouseEnabled = true;
   btnVokalBergambar.mouseChildren = true;
   btnVokalBergambar.cursor = "pointer";
-  btnVokalBergambar.y = canvas.height / 2 - 200;
-  btnVokalBergambar.x = canvas.width / 2 - 120;
-  btnVokalBergambar.scale = 0.3; // Apply scaling
+  btnVokalBergambar.y = canvas.height / 2 * .4;
+  btnVokalBergambar.x =  isMobile.value ? canvas.width / 2 * .6 : canvas.width / 2 * .75;
+  btnVokalBergambar.scale = 0.3 * dpr; // Apply scaling
 
 
   // Add event listeners for hover and click
@@ -306,9 +319,9 @@ function loadScene(){
   btnKonsonan.mouseEnabled = true;
   btnKonsonan.mouseChildren = true;
   btnKonsonan.cursor = "pointer";
-  btnKonsonan.y = canvas.height / 2 + 50;
-  btnKonsonan.x = canvas.width / 2 - 120;
-  btnKonsonan.scale = 0.3; // Apply scaling
+  btnKonsonan.y = canvas.height * .6;
+  btnKonsonan.x = isMobile.value ? canvas.width / 2 * .65 :  canvas.width * .4;
+  btnKonsonan.scale = 0.3 * dpr; // Apply scaling
 
 
   // Add event listeners for hover and click
@@ -356,9 +369,9 @@ function loadScene(){
   btnKonsonanBergambar.mouseEnabled = true;
   btnKonsonanBergambar.mouseChildren = true;
   btnKonsonanBergambar.cursor = "pointer";
-  btnKonsonanBergambar.y = canvas.height / 2 - 30;
-  btnKonsonanBergambar.x = canvas.width / 2 + 150;
-  btnKonsonanBergambar.scale = 0.3; // Apply scaling
+  btnKonsonanBergambar.y = canvas.height / 2 * .8;
+  btnKonsonanBergambar.x = isMobile.value ? canvas.width * .6 : canvas.width * .6;
+  btnKonsonanBergambar.scale = 0.3 * dpr; // Apply scaling
 
 
   // Add event listeners for hover and click
@@ -425,6 +438,8 @@ onUnmounted(() => {
   <div id="container">
     <canvas id="canvas"></canvas>
   </div>
+
+  <Loader v-if="isLoading"></Loader>
 </template>
 
 <style scoped>
