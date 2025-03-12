@@ -53,6 +53,7 @@ function init() {
   // console.log(stage.canvas.width, stage.canvas.height, dpr);
 
   queue = new createjs.LoadQueue();
+  queue.setMaxConnections(10);
   queue.installPlugin(createjs.Sound);
   queue.on("complete", handleComplete);
   queue.loadManifest([

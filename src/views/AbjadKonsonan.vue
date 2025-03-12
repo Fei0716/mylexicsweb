@@ -675,6 +675,7 @@ function init() {
   }
 
   queue = new createjs.LoadQueue();
+  queue.setMaxConnections(10);
   queue.installPlugin(createjs.Sound);
   queue.on("complete", handleComplete);
   queue.loadManifest(mergedAssetsArr);
