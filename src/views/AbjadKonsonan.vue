@@ -674,7 +674,7 @@ function init() {
     stage.enableMouseOver(1000); // Keep it for desktop
   }
 
-  queue = new createjs.LoadQueue();
+  queue = new createjs.LoadQueue(false);
   queue.setMaxConnections(10);
   queue.installPlugin(createjs.Sound);
   queue.on("complete", handleComplete);

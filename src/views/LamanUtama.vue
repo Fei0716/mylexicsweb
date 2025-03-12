@@ -52,7 +52,7 @@ function init() {
   // stage.canvas.style.height = `${targetHeight}px`;
   // console.log(stage.canvas.width, stage.canvas.height, dpr);
 
-  queue = new createjs.LoadQueue();
+  queue = new createjs.LoadQueue(false);
   queue.setMaxConnections(10);
   queue.installPlugin(createjs.Sound);
   queue.on("complete", handleComplete);

@@ -90,7 +90,7 @@ function init() {
   stage.canvas.width = Math.round(dpr * targetWidth);
   stage.canvas.height  = Math.round(dpr * targetHeight);
 
-  queue = new createjs.LoadQueue();
+  queue = new createjs.LoadQueue(false);
   queue.setMaxConnections(10);
   queue.installPlugin(createjs.Sound);
   queue.on("complete", handleComplete);
