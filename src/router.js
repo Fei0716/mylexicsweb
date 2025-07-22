@@ -5,7 +5,11 @@ import AbjadVokal from "./views/AbjadVokal.vue";
 import AbjadVokalBergambar from "./views/AdjadVokalBergambar.vue";
 import AbjadKonsonan from "./views/AbjadKonsonan.vue";
 import AbjadKonsonanBergambar from "./views/AbjadKonsonanBergambar.vue";
+import LamanSukukata from "./views/LamanSukukata.vue";
+import SukukataKv from "./views/SukukataKv.vue";
+import SukukataKvk from "./views/SukukataKvk.vue";
 
+import LamanPerkataan from "./views/LamanPerkataan.vue";
 
 const routes = [
     {
@@ -37,6 +41,26 @@ const routes = [
         path: "/laman-abjad/konsonan-bergambar",
         name: "AbjadKonsonanBergambar",
         component: AbjadKonsonanBergambar
+    },
+    {
+        path: "/laman-sukukata",
+        name: "LamanSukukata",
+        component: LamanSukukata
+    },
+    {
+        path: "/laman-sukukata/sukukata-kv",
+        name: "SukukataKv",
+        component: SukukataKv
+    },
+    {
+        path: "/laman-sukukata/sukukata-kvk",
+        name: "SukukataKvk",
+        component: SukukataKvk
+    },
+    {
+        path: "/laman-perkataan",
+        name: "LamanPerkataan",
+        component: LamanPerkataan
     },
     {
         path: "/:catchAll(.*)",

@@ -22,7 +22,10 @@ function nextPage(){
       router.push({name: 'AbjadKonsonanBergambar'});
       break;
     case "AbjadKonsonanBergambar":
-      router.push({name: 'LamanUtama'});
+      router.push({name: 'LamanSukukata'});
+      break;
+    case "SukukataKv":
+      router.push({name: 'SukukataKvk'});
       break;
     default:break;
   }
@@ -54,6 +57,7 @@ function nextPage(){
       width: 100%;
       height: 100%;
       object-fit: cover;
+      user-select: none;
     }
 
     button{

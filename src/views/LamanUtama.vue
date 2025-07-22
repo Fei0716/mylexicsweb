@@ -28,6 +28,8 @@ let cloudFormationImg;
 let homeDeco;
 let sunImg;
 let btnAbjad;
+let btnSukukata;
+let btnPerkataan;
 let btnPenghargaan;
 let snailImg;
 let butterflyImg;
@@ -75,6 +77,8 @@ function init() {
       {id: "btn_games_01", src: "/images/btn_games_01.png"},
       {id: "btn_games_02", src: "/images/btn_games_02.png"},
       {id: "sound_abjad", src: "/sounds/sound_abjad.mp3"},
+      {id: "sound_sukukata", src: "/sounds/sound_sukukata.mp3"},
+      {id: "sound_perkataan", src: "/sounds/sound_perkataan.mp3"},
       {id: "sound_penghargaan", src: "/sounds/penghargaan.mp3"},
       {id: "home_deco", src: "/images/home_deco.png"},
       {id: "cloud_formation", src: "/images/cloud_formation.png"},
@@ -226,11 +230,101 @@ function loadScene(){
 
   stage.addChild(sunImg)
 
-  homeDeco = new createjs.Bitmap(queue.getResult("home_deco"));
-  homeDeco.x = isMobile.value ? canvas.width * .35 : canvas.width * .45;
-  homeDeco.y = isMobile.value ? canvas.height * .45 :  canvas.height * .2;
-  homeDeco.scale = isMobile.value ? 0.5 * dpr :  0.6 * dpr;
-  stage.addChild(homeDeco);
+  // Define a SpriteSheet with two frames (normal & hover)
+  let buttonPerkataanSpriteSheet = new createjs.SpriteSheet({
+    images: [
+      queue.getResult("btn_perkataan_01"), // Normal state
+      queue.getResult("btn_perkataan_02")  // Hover / Click state
+    ],
+    frames: { width: 579, height: 654 }, // Adjust size as needed
+    animations: {
+      normal: 0,
+      hover: 1
+    }
+  });
+  btnPerkataan = new createjs.Sprite(buttonPerkataanSpriteSheet, "normal");
+  btnPerkataan.mouseEnabled = true;
+  btnPerkataan.mouseChildren = true;
+  btnPerkataan.cursor = "pointer";
+  btnPerkataan.y = canvas.height * .45;
+  btnPerkataan.x = isMobile.value ? canvas.width * .49: canvas.width * .4;
+  btnPerkataan.scale = 0.35 * dpr; // Apply scaling
+  // Ensure stage updates
+  stage.update();
+  // Add event listeners for hover and click
+  btnPerkataan.on("mouseover", () => {
+    btnPerkataan.gotoAndStop("hover");
+    // Prevent overlapping sounds
+    if (!playingSound || playingSound.playState === createjs.Sound.PLAY_FINISHED) {
+      playingSound = createjs.Sound.play("sound_perkataan");
+    }
+  });
+  btnPerkataan.on("mouseout", () => {
+    btnPerkataan.gotoAndStop("normal");
+    //Stop the sound when mouse leaves
+    if (playingSound) {
+      playingSound.stop();
+      playingSound = null;
+    }
+  });
+  btnPerkataan.on("click", () => {
+    btnPerkataan.gotoAndStop("hover");
+    if (playingSound) {
+      playingSound.stop();
+      playingSound = null;
+    }
+    //navigate to the abjad page
+    router.push({name: 'LamanPerkataan'});
+  });
+  stage.addChild(btnPerkataan);
+
+  // Define a SpriteSheet with two frames (normal & hover)
+  let buttonSukukataSpriteSheet = new createjs.SpriteSheet({
+    images: [
+      queue.getResult("btn_sukukata_01"), // Normal state
+      queue.getResult("btn_sukukata_02")  // Hover / Click state
+    ],
+    frames: { width: 579, height: 654 }, // Adjust size as needed
+    animations: {
+      normal: 0,
+      hover: 1
+    }
+  });
+  btnSukukata = new createjs.Sprite(buttonSukukataSpriteSheet, "normal");
+  btnSukukata.mouseEnabled = true;
+  btnSukukata.mouseChildren = true;
+  btnSukukata.cursor = "pointer";
+  btnSukukata.y = canvas.height * .55;
+  btnSukukata.x = isMobile.value ? canvas.width * .25 : canvas.width * .2;
+  btnSukukata.scale = 0.35 * dpr; // Apply scaling
+  // Ensure stage updates
+  stage.update();
+  // Add event listeners for hover and click
+  btnSukukata.on("mouseover", () => {
+    btnSukukata.gotoAndStop("hover");
+    // Prevent overlapping sounds
+    if (!playingSound || playingSound.playState === createjs.Sound.PLAY_FINISHED) {
+      playingSound = createjs.Sound.play("sound_sukukata");
+    }
+  });
+  btnSukukata.on("mouseout", () => {
+    btnSukukata.gotoAndStop("normal");
+    //Stop the sound when mouse leaves
+    if (playingSound) {
+      playingSound.stop();
+      playingSound = null;
+    }
+  });
+  btnSukukata.on("click", () => {
+    btnSukukata.gotoAndStop("hover");
+    if (playingSound) {
+      playingSound.stop();
+      playingSound = null;
+    }
+    //navigate to the abjad page
+    router.push({name: 'LamanSukukata'});
+  });
+  stage.addChild(btnSukukata);
 
   // Define a SpriteSheet with two frames (normal & hover)
   let buttonAbjadSpriteSheet = new createjs.SpriteSheet({
@@ -244,13 +338,14 @@ function loadScene(){
       hover: 1
     }
   });
+
   // Create the Sprite
   btnAbjad = new createjs.Sprite(buttonAbjadSpriteSheet, "normal");
   btnAbjad.mouseEnabled = true;
   btnAbjad.mouseChildren = true;
   btnAbjad.cursor = "pointer";
-  btnAbjad.y = canvas.height / 2;
-  btnAbjad.x = canvas.width * .2;
+  btnAbjad.y = canvas.height * .66;
+  btnAbjad.x = canvas.width * .01;
   btnAbjad.scale = 0.35 * dpr; // Apply scaling
   // Ensure stage updates
   stage.update();
@@ -280,6 +375,8 @@ function loadScene(){
     router.push({name: 'LamanAbjad'});
   });
   stage.addChild(btnAbjad);
+
+
 
   let btnPenghargaanSpriteSheet = new createjs.SpriteSheet({
     images: [
@@ -328,6 +425,13 @@ function loadScene(){
 
   });
   stage.addChild(btnPenghargaan);
+
+  homeDeco = new createjs.Bitmap(queue.getResult("home_deco"));
+  homeDeco.x = isMobile.value ? canvas.width * .4 : canvas.width * .48;
+  homeDeco.y = isMobile.value ? canvas.height * .45 :  canvas.height * .24;
+  homeDeco.scale = isMobile.value ? 0.5 * dpr :  0.6 * dpr;
+  stage.addChild(homeDeco);
+
 
 // Create the snail image
   snailImg = new createjs.Bitmap(queue.getResult("snail"));
