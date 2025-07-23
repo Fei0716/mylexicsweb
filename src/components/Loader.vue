@@ -43,8 +43,8 @@
 .wheel-and-hamster {
   --dur: 1s;
   position: relative;
-  width: 12em;
-  height: 12em;
+  width: 8em;
+  height: 8em;
   font-size: 14px;
 }
 
@@ -71,13 +71,14 @@
 
 .hamster {
   animation: hamster var(--dur) ease-in-out infinite;
-  top: 50%;
-  left: calc(50% - 3.5em);
+  top: 49%;
+  left: calc(50% - 3.25em);
   width: 7em;
   height: 3.75em;
   transform: rotate(4deg) translate(-0.8em,1.85em);
   transform-origin: 50% 0;
   z-index: 1;
+  scale: .7;
 }
 
 .hamster__head {
