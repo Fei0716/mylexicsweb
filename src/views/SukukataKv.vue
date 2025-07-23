@@ -985,7 +985,6 @@ const generalAssetsArr = [
   //   images
   {id: "background", src: "/images/sukukata/kv/background.png"},
   {id: "title", src: "/images/sukukata/kv/title_sukukata_kv.png"},
-  {id: "tv", src: "/images/tv_2.png"},
 
   {id: "btn_home_01", src: "/images/btn_home_01.png"},
   {id: "btn_home_02", src: "/images/btn_home_02.png"},
