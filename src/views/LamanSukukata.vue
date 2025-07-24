@@ -56,6 +56,7 @@ function init() {
     {id: "btn_kvk_02", src: "/images/sukukata/btn_kenali_sukukata_kvk0002.png"},
 
     //  sounds
+    {id: "sound_laman_utama", src: "/sounds/laman_utama.mp3"},
     {id: "sound_kv", src: "/sounds/sukukata/kenali_kv.mp3"},
     {id: "sound_kvk", src: "/sounds/sukukata/kenali_kvk.mp3"},
     {id: "sound_keluar", src: "/sounds/keluar.mp3"},

@@ -9,24 +9,23 @@ let queue;
 const dpr = window.devicePixelRatio || 1;
 let playingSound = null;
 // objects
-let abjadBackgroundImg;
-let abjadTitleImg;
+let backgroundImg;
+let titleImg;
 let btnHome;
 let btnKeluar;
-let btnVokal;
-let btnVokalBergambar;
-let btnKonsonan;
-let btnKonsonanBergambar;
+let btnKenaliPerkataan;
+let btnKeluargaPerkataan;
 let isLoading = ref(true);
-let isMobile = computed(()=>{
-  return  window.innerWidth < 1000 && window.innerWidth < window.innerHeight;
+let isMobile = computed(() => {
+  return window.innerWidth < 1000 && window.innerWidth < window.innerHeight;
 });
-let targetWidth = isMobile.value ? 675: 1000;
+let targetWidth = isMobile.value ? 675 : 1000;
 let targetHeight = isMobile.value ? 800 : 675;
+
 function init() {
   //get DPI
   canvas = document.getElementById("canvas");
-  canvas.width = targetWidth ;
+  canvas.width = targetWidth;
   canvas.height = targetHeight;
 
   stage = new createjs.Stage(canvas);
@@ -38,7 +37,7 @@ function init() {
     stage.enableMouseOver(1000); // Keep it for desktop
   }
   stage.canvas.width = Math.round(dpr * targetWidth);
-  stage.canvas.height  = Math.round(dpr * targetHeight);
+  stage.canvas.height = Math.round(dpr * targetHeight);
 
   queue = new createjs.LoadQueue(false);
   queue.setMaxConnections(10);
@@ -47,34 +46,28 @@ function init() {
   queue.loadManifest([
     //   images
     {id: "abjad_background", src: "/images/abjad_background.png"},
-    {id: "title_abjad", src: "/images/title_abjad.png"},
+    {id: "title_abjad", src: "/images/perkataan/title_perkataan.png"},
     {id: "btn_home_01", src: "/images/btn_home_01.png"},
     {id: "btn_home_02", src: "/images/btn_home_02.png"},
     {id: "btn_keluar_01", src: "/images/btn_keluar_01.png"},
     {id: "btn_keluar_02", src: "/images/btn_keluar_02.png"},
-    {id: "btn_vokal_01", src: "/images/btn_vokal_01.png"},
-    {id: "btn_vokal_02", src: "/images/btn_vokal_02.png"},
-    {id: "btn_vokal_bergambar_01", src: "/images/btn_vokal_bergambar_01.png"},
-    {id: "btn_vokal_bergambar_02", src: "/images/btn_vokal_bergambar_02.png"},
-    {id: "btn_konsonan_01", src: "/images/btn_konsonan_01.png"},
-    {id: "btn_konsonan_02", src: "/images/btn_konsonan_02.png"},
-    {id: "btn_konsonan_bergambar_01", src: "/images/btn_konsonan_bergambar_01.png"},
-    {id: "btn_konsonan_bergambar_02", src: "/images/btn_konsonan_bergambar_02.png"},
-    //  sounds
-    {id: "sound_vokal", src: "/sounds/kenali_vokal.mp3"},
-    {id: "sound_vokal_bergambar", src: "/sounds/kenali_vokal_bergambar.mp3"},
-    {id: "sound_konsonan", src: "/sounds/kenali_konsonan.mp3"},
-    {id: "sound_konsonan_bergambar", src: "/sounds/kenali_konsonan_bergambar.mp3"},
-    {id: "sound_laman_utama", src: "/sounds/laman_utama.mp3"},
-    {id: "sound_keluar", src: "/sounds/keluar.mp3"},
-    {id: "sound_submenu_abjad", src: "/sounds/submenu_abjad.mp3"},
+    {id: "btn_keluarga_perkataan_01", src: "/images/perkataan/btn_keluarga_perkataan0001.png"},
+    {id: "btn_keluarga_perkataan_02", src: "/images/perkataan/btn_keluarga_perkataan0002.png"},
+    {id: "btn_kenali_perkataan_01", src: "/images/perkataan/btn_kenali_perkataan0001.png"},
+    {id: "btn_kenali_perkataan_02", src: "/images/perkataan/btn_kenali_perkataan0002.png"},
 
+    //  sounds
+    {id: "sound_laman_utama", src: "/sounds/laman_utama.mp3"},
+    {id: "sound_kenali_perkataan", src: "/sounds/perkataan/kenali_perkataan.mp3"},
+    {id: "sound_keluarga_perkataan", src: "/sounds/perkataan/keluarga_perkataan.mp3"},
+    {id: "sound_keluar", src: "/sounds/keluar.mp3"},
+    {id: "sound_submenu_perkataan", src: "/sounds/perkataan/submenu_perkataan.mp3"},
   ]);
 }
 
 function handleComplete() {
   isLoading.value = false;
-  playingSound = createjs.Sound.play("sound_submenu_abjad");
+  playingSound = createjs.Sound.play("sound_submenu_perkataan");
   loadScene();
   createjs.Ticker.addEventListener("tick", handleTick);
 }
@@ -85,34 +78,35 @@ function handleTick() {
   * */
   stage.update();
 }
-function loadScene(){
+
+function loadScene() {
   /*
   * load up the images
   * */
-  abjadBackgroundImg = new createjs.Bitmap(queue.getResult("abjad_background"));
+  backgroundImg = new createjs.Bitmap(queue.getResult("abjad_background"));
   // Set registration point to center (better for positioning)
-  abjadBackgroundImg.regX = abjadBackgroundImg.image.width / 2;
-  abjadBackgroundImg.regY = abjadBackgroundImg.image.height / 2;
+  backgroundImg.regX = backgroundImg.image.width / 2;
+  backgroundImg.regY = backgroundImg.image.height / 2;
   // Position it centered horizontally and slightly above the bottom
-  abjadBackgroundImg.x = canvas.width / 2;
-  abjadBackgroundImg.y = canvas.height * .45 ; // Adjust this value if needed
+  backgroundImg.x = canvas.width / 2;
+  backgroundImg.y = canvas.height * .45; // Adjust this value if needed
   // Scale it properly
-  abjadBackgroundImg.scaleX = abjadBackgroundImg.scaleY = isMobile.value ? .45* dpr:  0.4 * dpr;
-  stage.addChild(abjadBackgroundImg); // Green background on top
+  backgroundImg.scaleX = backgroundImg.scaleY = isMobile.value ? .45 * dpr : 0.4 * dpr;
+  stage.addChild(backgroundImg); // Green background on top
 
-  abjadTitleImg = new createjs.Bitmap(queue.getResult("title_abjad"));
-  abjadTitleImg.regX = abjadTitleImg.image.width / 2;
-  abjadTitleImg.x = canvas.width / 2;
-  abjadTitleImg.y = canvas.height * .01;
-  abjadTitleImg.scale =  isMobile.value ? .3 * dpr: .35 * dpr;
-  stage.addChild(abjadTitleImg);
+  titleImg = new createjs.Bitmap(queue.getResult("title_abjad"));
+  titleImg.regX = titleImg.image.width / 2;
+  titleImg.x = canvas.width / 2;
+  titleImg.y = canvas.height * .01;
+  titleImg.scale = isMobile.value ? .3 * dpr : .35 * dpr;
+  stage.addChild(titleImg);
 
   let btnHomeSpriteSheet = new createjs.SpriteSheet({
     images: [
       queue.getResult("btn_home_01"), // Normal state
       queue.getResult("btn_home_02")  // Hover / Click state
     ],
-    frames: { width: 333, height: 363 }, // Adjust size as needed
+    frames: {width: 333, height: 363}, // Adjust size as needed
     animations: {
       normal: 0,
       hover: 1
@@ -161,7 +155,7 @@ function loadScene(){
       queue.getResult("btn_keluar_01"), // Normal state
       queue.getResult("btn_keluar_02")  // Hover / Click state
     ],
-    frames: { width: 373, height: 451 }, // Adjust size as needed
+    frames: {width: 373, height: 451}, // Adjust size as needed
     animations: {
       normal: 0,
       hover: 1
@@ -174,7 +168,7 @@ function loadScene(){
   btnKeluar.mouseChildren = true;
   btnKeluar.cursor = "pointer";
   btnKeluar.y = canvas.height * .02;
-  btnKeluar.x = canvas.width ;
+  btnKeluar.x = canvas.width;
   btnKeluar.scale = .3 * dpr;// Apply scaling
 
   // Add event listeners for hover and click
@@ -204,111 +198,60 @@ function loadScene(){
   });
   // stage.addChild(btnKeluar);
 
-  let btnVokalSpriteSheet = new createjs.SpriteSheet({
+  let btnKenaliPerkataanSpriteSheet = new createjs.SpriteSheet({
     images: [
-      queue.getResult("btn_vokal_01"), // Normal state
-      queue.getResult("btn_vokal_02")  // Hover / Click state
+      queue.getResult("btn_kenali_perkataan_01"), // Normal state
+      queue.getResult("btn_kenali_perkataan_02")  // Hover / Click state
     ],
-    frames: { width: 727, height: 780 }, // Adjust size as needed
+    frames: {width: 721, height: 762}, // Adjust size as needed
     animations: {
       normal: 0,
       hover: 1
     }
   });
   // Create the Sprite
-  btnVokal = new createjs.Sprite(btnVokalSpriteSheet, "normal");
-  btnVokal.mouseEnabled = true;
-  btnVokal.mouseChildren = true;
-  btnVokal.cursor = "pointer";
-  btnVokal.regY = abjadTitleImg.image.height / 2;
-  btnVokal.y = canvas.height / 2 * .95;
-  btnVokal.x =  isMobile.value ? canvas.width * .01 : canvas.width * .15;
-  btnVokal.scale = .3 * dpr; // Apply scaling
+  btnKenaliPerkataan = new createjs.Sprite(btnKenaliPerkataanSpriteSheet, "normal");
+  btnKenaliPerkataan.mouseEnabled = true;
+  btnKenaliPerkataan.mouseChildren = true;
+  btnKenaliPerkataan.cursor = "pointer";
+  btnKenaliPerkataan.regY = titleImg.image.height / 2;
+  btnKenaliPerkataan.y = canvas.height / 2 * .85;
+  btnKenaliPerkataan.x = isMobile.value ? canvas.width * .07 : canvas.width * .20;
+  btnKenaliPerkataan.scale = .35 * dpr; // Apply scaling
 
 
   // Add event listeners for hover and click
-  btnVokal.on("mouseover", () => {
-    btnVokal.gotoAndStop("hover");
+  btnKenaliPerkataan.on("mouseover", () => {
+    btnKenaliPerkataan.gotoAndStop("hover");
     // Prevent overlapping sounds
     if (!playingSound || playingSound.playState === createjs.Sound.PLAY_FINISHED) {
-      playingSound = createjs.Sound.play("sound_vokal");
+      playingSound = createjs.Sound.play("sound_kenali_perkataan");
     }
   });
-  btnVokal.on("mouseout", () => {
-    btnVokal.gotoAndStop("normal");
+  btnKenaliPerkataan.on("mouseout", () => {
+    btnKenaliPerkataan.gotoAndStop("normal");
     //Stop the sound when mouse leaves
     if (playingSound) {
       playingSound.stop();
       playingSound = null;
     }
   });
-  btnVokal.on("click", () => {
-    btnVokal.gotoAndStop("hover");
+  btnKenaliPerkataan.on("click", () => {
+    btnKenaliPerkataan.gotoAndStop("hover");
     if (playingSound) {
       playingSound.stop();
       playingSound = null;
     }
-    //navigate to the abjad page
-    router.push({name: 'AbjadVokal'});
+    router.push({name: 'KenaliPerkataan'});
   });
-  stage.addChild(btnVokal);
+  stage.addChild(btnKenaliPerkataan);
 
-  let btnVokalBergambarSpriteSheet = new createjs.SpriteSheet({
+  let btnKeluargaPerkataanSpriteSheet = new createjs.SpriteSheet({
     images: [
-      queue.getResult("btn_vokal_bergambar_01"), // Normal state
-      queue.getResult("btn_vokal_bergambar_02")  // Hover / Click state
+      queue.getResult("btn_keluarga_perkataan_01"), // Normal state
+      queue.getResult("btn_keluarga_perkataan_02")  // Hover / Click state
     ],
-    frames: { width: 756, height: 766 }, // Adjust size as needed
-    animations: {
-      normal: 0,
-      hover: 1
-    }
-  });
-
-  // Create the Sprite
-  btnVokalBergambar = new createjs.Sprite(btnVokalBergambarSpriteSheet, "normal");
-  btnVokalBergambar.mouseEnabled = true;
-  btnVokalBergambar.mouseChildren = true;
-  btnVokalBergambar.cursor = "pointer";
-  btnVokalBergambar.y = canvas.height / 2 * .4;
-  btnVokalBergambar.x =  isMobile.value ? canvas.width / 2 * .6 : canvas.width / 2 * .75;
-  btnVokalBergambar.scale = 0.3 * dpr; // Apply scaling
-
-
-  // Add event listeners for hover and click
-  btnVokalBergambar.on("mouseover", () => {
-    btnVokalBergambar.gotoAndStop("hover");
-    // Prevent overlapping sounds
-    if (!playingSound || playingSound.playState === createjs.Sound.PLAY_FINISHED) {
-      playingSound = createjs.Sound.play("sound_vokal_bergambar");
-    }
-  });
-  btnVokalBergambar.on("mouseout", () => {
-    btnVokalBergambar.gotoAndStop("normal");
-    //Stop the sound when mouse leaves
-    if (playingSound) {
-      playingSound.stop();
-      playingSound = null;
-    }
-  });
-  btnVokalBergambar.on("click", () => {
-    btnVokalBergambar.gotoAndStop("hover");
-    if (playingSound) {
-      playingSound.stop();
-      playingSound = null;
-    }
-    //navigate to the abjad page
-    router.push({name: 'AbjadVokalBergambar'});
-  });
-  stage.addChild(btnVokalBergambar);
-
-
-  let btnKonsonanSpriteSheet = new createjs.SpriteSheet({
-    images: [
-      queue.getResult("btn_konsonan_01"), // Normal state
-      queue.getResult("btn_konsonan_02")  // Hover / Click state
-    ],
-    frames: { width: 727, height: 766 }, // Adjust size as needed
+    frames: {width: 721, height: 762}, // Adjust size as needed
     animations: {
       normal: 0,
       hover: 1
@@ -316,92 +259,44 @@ function loadScene(){
   });
 
   // Create the Sprite
-  btnKonsonan = new createjs.Sprite(btnKonsonanSpriteSheet, "normal");
-  btnKonsonan.mouseEnabled = true;
-  btnKonsonan.mouseChildren = true;
-  btnKonsonan.cursor = "pointer";
-  btnKonsonan.y = canvas.height * .6;
-  btnKonsonan.x = isMobile.value ? canvas.width / 2 * .65 :  canvas.width * .4;
-  btnKonsonan.scale = 0.3 * dpr; // Apply scaling
+  btnKeluargaPerkataan = new createjs.Sprite(btnKeluargaPerkataanSpriteSheet, "normal");
+  btnKeluargaPerkataan.mouseEnabled = true;
+  btnKeluargaPerkataan.mouseChildren = true;
+  btnKeluargaPerkataan.cursor = "pointer";
+  btnKeluargaPerkataan.regY = titleImg.image.height / 2;
+  btnKeluargaPerkataan.y = canvas.height / 2 * .85;
+  btnKeluargaPerkataan.x = isMobile.value ? canvas.width * .55 : canvas.width / 2;
+  btnKeluargaPerkataan.scale = 0.35 * dpr; // Apply scaling
 
 
   // Add event listeners for hover and click
-  btnKonsonan.on("mouseover", () => {
-    btnKonsonan.gotoAndStop("hover");
+  btnKeluargaPerkataan.on("mouseover", () => {
+    btnKeluargaPerkataan.gotoAndStop("hover");
     // Prevent overlapping sounds
     if (!playingSound || playingSound.playState === createjs.Sound.PLAY_FINISHED) {
-      playingSound = createjs.Sound.play("sound_konsonan");
+      playingSound = createjs.Sound.play("sound_keluarga_perkataan");
     }
   });
-  btnKonsonan.on("mouseout", () => {
-    btnKonsonan.gotoAndStop("normal");
+  btnKeluargaPerkataan.on("mouseout", () => {
+    btnKeluargaPerkataan.gotoAndStop("normal");
     //Stop the sound when mouse leaves
     if (playingSound) {
       playingSound.stop();
       playingSound = null;
     }
   });
-  btnKonsonan.on("click", () => {
-    btnKonsonan.gotoAndStop("hover");
+  btnKeluargaPerkataan.on("click", () => {
+    btnKeluargaPerkataan.gotoAndStop("hover");
     if (playingSound) {
       playingSound.stop();
       playingSound = null;
     }
     //navigate to the abjad page
-    router.push({name: 'AbjadKonsonan'});
+    router.push({name: 'KeluargaPerkataan'});
   });
-  stage.addChild(btnKonsonan);
-
-
-  let btnKonsonanBergambarSpriteSheet = new createjs.SpriteSheet({
-    images: [
-      queue.getResult("btn_konsonan_bergambar_01"), // Normal state
-      queue.getResult("btn_konsonan_bergambar_02")  // Hover / Click state
-    ],
-    frames: { width: 839, height: 766 }, // Adjust size as needed
-    animations: {
-      normal: 0,
-      hover: 1
-    }
-  });
-
-  // Create the Sprite
-  btnKonsonanBergambar = new createjs.Sprite(btnKonsonanBergambarSpriteSheet, "normal");
-  btnKonsonanBergambar.mouseEnabled = true;
-  btnKonsonanBergambar.mouseChildren = true;
-  btnKonsonanBergambar.cursor = "pointer";
-  btnKonsonanBergambar.y = canvas.height / 2 * .8;
-  btnKonsonanBergambar.x = isMobile.value ? canvas.width * .6 : canvas.width * .6;
-  btnKonsonanBergambar.scale = 0.3 * dpr; // Apply scaling
-
-
-  // Add event listeners for hover and click
-  btnKonsonanBergambar.on("mouseover", () => {
-    btnKonsonanBergambar.gotoAndStop("hover");
-    // Prevent overlapping sounds
-    if (!playingSound || playingSound.playState === createjs.Sound.PLAY_FINISHED) {
-      playingSound = createjs.Sound.play("sound_konsonan_bergambar");
-    }
-  });
-  btnKonsonanBergambar.on("mouseout", () => {
-    btnKonsonanBergambar.gotoAndStop("normal");
-    //Stop the sound when mouse leaves
-    if (playingSound) {
-      playingSound.stop();
-      playingSound = null;
-    }
-  });
-  btnKonsonanBergambar.on("click", () => {
-    btnKonsonanBergambar.gotoAndStop("hover");
-    if (playingSound) {
-      playingSound.stop();
-      playingSound = null;
-    }
-    //navigate to the abjad page
-    router.push({name: 'AbjadKonsonanBergambar'});
-  });
-  stage.addChild(btnKonsonanBergambar);
+  stage.addChild(btnKeluargaPerkataan);
 }
+
 function cleanupCreateJS() {
   if (queue) {
     queue.removeAllEventListeners(); // Remove all event listeners
