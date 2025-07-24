@@ -27,6 +27,9 @@ function nextPage(){
     case "SukukataKv":
       router.push({name: 'SukukataKvk'});
       break;
+    case "SukukataKvk":
+      router.push({name: 'LamanPerkataan'});
+      break;
     default:break;
   }
 }

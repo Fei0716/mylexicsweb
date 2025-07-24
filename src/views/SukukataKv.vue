@@ -28,7 +28,7 @@ let btnSubmenu;
 let btnBantuan;
 let btnArahan;
 let btnNext;
-let btnPrevious;
+let btnPrevious = null;
 let sukukata = [
     // first page
     {
@@ -1059,7 +1059,7 @@ function loadScene(){
   backgroundImg.x = canvas.width / 2;
   backgroundImg.y = canvas.height * .45 ; // Adjust this value if needed
   // Scale it properly
-  backgroundImg.scaleX = backgroundImg.scaleY = isMobile.value ? 0.45 * dpr :0.4 * dpr;
+  backgroundImg.scaleX = backgroundImg.scaleY = isMobile.value ? 0.46 * dpr :0.4 * dpr;
   stage.addChild(backgroundImg); // Green background on top
 
 
@@ -1397,9 +1397,11 @@ function navigateToAnotherPage(direction){
   if(direction === "next"){
     if(currentPage >= 1 && currentPage < sukukata.length){
       hideDisplayButtons();
-      addPreviousButton();
       currentPage++;
       initButtons();
+      if(currentPage === 2){
+        addPreviousButton();
+      }
     }
     else if(currentPage === sukukata.length){
       navigateToAnotherSubmenu();
@@ -1409,10 +1411,10 @@ function navigateToAnotherPage(direction){
       hideDisplayButtons();
       currentPage--;
       initButtons();
-    }
-    else if(currentPage === 1){
-      //hide the previous button
-      hidePreviousButton();
+      if(currentPage === 1){
+        //hide the previous button
+        hidePreviousButton();
+      }
     }
   }
 }
@@ -1426,7 +1428,7 @@ function hideDisplayButtons(){
 
 }
 function addPreviousButton(){
-  if(!btnPrevious){
+  if(btnPrevious === null){
     let btnPreviousSpriteSheet = new createjs.SpriteSheet({
       images: [
         queue.getResult("btn_previous_01"), // Normal state
@@ -1451,12 +1453,12 @@ function addPreviousButton(){
       btnPrevious.gotoAndStop("hover");
     });
     btnPrevious.on("mouseout", () => {
-      btnPrevious.gotoAndStop("normal");
+      btnPrevious?.gotoAndStop("normal");
     });
     btnPrevious.on("click", () => {
       btnPrevious.gotoAndStop("hover");
       setTimeout(() => {
-        btnPrevious.gotoAndStop("normal");
+        btnPrevious?.gotoAndStop("normal");
       }, 200);
       navigateToAnotherPage("previous");
     });
@@ -1466,6 +1468,7 @@ function addPreviousButton(){
 function hidePreviousButton(){
   if(btnPrevious){
     stage.removeChild(btnPrevious);
+    btnPrevious = null;
   }
 }
 

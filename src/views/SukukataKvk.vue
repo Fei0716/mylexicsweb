@@ -11,6 +11,11 @@ let playingSound = null;
 let playingAnimation = null;
 let keyboardButtons = [];
 let displayedButtons = [];
+let displayedLastLetterElement = null;//store the createJs text element
+let displayedSukukataElement = null;
+let displayedLastLetter = "";//store the string
+let displayedSukukata = "";
+
 let currentPage = 1;
 let showModalContinue = ref(false);
 let isLoading = ref(true);
@@ -33,14 +38,14 @@ let btnSubmenu;
 let btnBantuan;
 let btnArahan;
 let btnNext;
-let btnPrevious;
+let btnPrevious = null;
 let sukukata = [
   // first page
   {
     //each letter
     letter: "b",
-    x: isMobile.value? .34: .34,
-    y: isMobile.value? .66: .66,
+    x: isMobile.value? .33: .34,
+    y: isMobile.value? .60: .66,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -125,8 +130,8 @@ let sukukata = [
   },
   {
     letter: "d",
-    x: isMobile.value? .4: .4,
-    y: isMobile.value? .66: .66,
+    x: isMobile.value? .42: .4,
+    y: isMobile.value? .60: .66,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -168,8 +173,8 @@ let sukukata = [
   },
   {
     letter: "f",
-    x: isMobile.value? .46: .46,
-    y: isMobile.value? .66: .66,
+    x: isMobile.value? .51: .46,
+    y: isMobile.value? .60: .66,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -212,8 +217,8 @@ let sukukata = [
   },
   {
     letter: "g",
-    x: isMobile.value? .52: .52,
-    y: isMobile.value? .66: .66,
+    x: isMobile.value? .60: .52,
+    y: isMobile.value? .60: .66,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -256,8 +261,8 @@ let sukukata = [
   },
   {
     letter: "h",
-    x: isMobile.value? .58: .58,
-    y: isMobile.value? .66: .66,
+    x: isMobile.value? .69: .58,
+    y: isMobile.value? .60: .66,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -300,8 +305,8 @@ let sukukata = [
   },
   {
     letter: "j",
-    x: isMobile.value? .64: .64,
-    y: isMobile.value? .66: .66,
+    x: isMobile.value? .78: .64,
+    y: isMobile.value? .60: .66,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -344,8 +349,8 @@ let sukukata = [
   },
   {
     letter: "k",
-    x: isMobile.value? .7: .7,
-    y: isMobile.value? .66: .66,
+    x: isMobile.value? .87: .7,
+    y: isMobile.value? .60: .66,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -388,8 +393,8 @@ let sukukata = [
   },
   {
     letter: "l",
-    x: isMobile.value? .34: .34,
-    y: isMobile.value? .75: .75,
+    x: isMobile.value? .33: .34,
+    y: isMobile.value? .67: .75,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -432,8 +437,8 @@ let sukukata = [
   },
   {
     letter: "m",
-    x: isMobile.value? .4: .4,
-    y: isMobile.value? .75: .75,
+    x: isMobile.value? .42: .4,
+    y: isMobile.value? .67: .75,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -476,8 +481,8 @@ let sukukata = [
   },
   {
     letter: "n",
-    x: isMobile.value? .46: .46,
-    y: isMobile.value? .75: .75,
+    x: isMobile.value? .51: .46,
+    y: isMobile.value? .67: .75,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -520,8 +525,8 @@ let sukukata = [
   },
   {
     letter: "p",
-    x: isMobile.value? .52: .52,
-    y: isMobile.value? .75: .75,
+    x: isMobile.value? .60: .52,
+    y: isMobile.value? .67: .75,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -564,8 +569,8 @@ let sukukata = [
   },
   {
     letter: "r",
-    x: isMobile.value? .58: .58,
-    y: isMobile.value? .75: .75,
+    x: isMobile.value? .69: .58,
+    y: isMobile.value? .67: .75,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -608,8 +613,8 @@ let sukukata = [
   },
   {
     letter: "s",
-    x: isMobile.value? .64: .64,
-    y: isMobile.value? .75: .75,
+    x: isMobile.value? .78: .64,
+    y: isMobile.value? .67: .75,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -652,8 +657,8 @@ let sukukata = [
   },
   {
     letter: "t",
-    x: isMobile.value? .7: .7,
-    y: isMobile.value? .75: .75,
+    x: isMobile.value? .87: .7,
+    y: isMobile.value? .67: .75,
     sukukata_arr: //array of sukukata of one page
         [
           {
@@ -818,7 +823,7 @@ function loadScene(){
   backgroundImg.x = canvas.width / 2;
   backgroundImg.y = canvas.height * .45 ; // Adjust this value if needed
   // Scale it properly
-  backgroundImg.scaleX = backgroundImg.scaleY = isMobile.value ? 0.45 * dpr :0.4 * dpr;
+  backgroundImg.scaleX = backgroundImg.scaleY = isMobile.value ? 0.46 * dpr :0.4 * dpr;
   stage.addChild(backgroundImg); // Green background on top
 
 
@@ -1078,24 +1083,24 @@ function loadScene(){
   pc = new createjs.Bitmap(queue.getResult("pc"));
   pc.regX = pc.image.width / 2;
   pc.x = canvas.width * .2;
-  pc.y = canvas.height * .3;
-  pc.scale = isMobile.value ? .3 * dpr: .35 * dpr;
+  pc.y = isMobile.value ? canvas.height * .28 : canvas.height * .3;
+  pc.scale = .35 * dpr;
   stage.addChild(pc);
 
   //add the monitor
   monitor = new createjs.Bitmap(queue.getResult("monitor"));
   monitor.regX = monitor.image.width / 2;
-  monitor.x = canvas.width * .55;
-  monitor.y = canvas.height * .26;
-  monitor.scale = isMobile.value ? .3 * dpr: .35 * dpr;
+  monitor.x = isMobile.value ? canvas.width * .65 : canvas.width * .55;
+  monitor.y = isMobile.value ? canvas.height * .28 : canvas.height * .26;
+  monitor.scale =  .35 * dpr;
   stage.addChild(monitor);
 
   //add the keyboard
   keyboard = new createjs.Bitmap(queue.getResult("keyboard"));
   keyboard.regX = keyboard.image.width / 2;
-  keyboard.x = canvas.width * .55;
-  keyboard.y = canvas.height * .65;
-  keyboard.scale = isMobile.value ? .3 * dpr: .35 * dpr;
+  keyboard.x = isMobile.value ? canvas.width * .64 : canvas.width * .55;
+  keyboard.y = isMobile.value ? canvas.height * .6 : canvas.height * .65;
+  keyboard.scale = isMobile.value ? .32 * dpr: .35 * dpr;
   stage.addChild(keyboard);
 
   //add the telinga button
@@ -1115,7 +1120,7 @@ function loadScene(){
   btnTelinga.mouseEnabled = true;
   btnTelinga.mouseChildren = true;
   btnTelinga.cursor = "pointer";
-  btnTelinga.y = canvas.height * .5;
+  btnTelinga.y = isMobile.value ? canvas.height * .18 : canvas.height * .5;
   btnTelinga.x = isMobile.value ? canvas.width * .55 :canvas.width * .8;
   btnTelinga.scale = .35 * dpr; // Apply scaling
   // Add event listeners for hover and click
@@ -1135,9 +1140,9 @@ function loadScene(){
 
   stage.addChild(btnTelinga);
 
-
   initKeyboardButtons();
   initButtons();
+  addPreviousButton();
 }
 function initKeyboardButtons(){
   sukukata.forEach((page)=>{
@@ -1164,6 +1169,7 @@ function initKeyboardButtons(){
       btn.y = canvas.height * page.y ;
       btn.x = canvas.width * page.x;
       btn.scale = .35 * dpr; // Apply scaling
+
       // Add event listeners for hover and click
       btn.on("mouseover", () => {
         btn.gotoAndStop("hover");
@@ -1208,9 +1214,20 @@ function initButtons(){
     btn.mouseEnabled = true;
     btn.mouseChildren = true;
     btn.cursor = "pointer";
-    btn.y = canvas.height * .44 + deltaY;
-    btn.x =  canvas.width  * .13;
-    btn.scale = .35 * dpr; // Apply scaling
+    btn.y = (isMobile.value? canvas.height * .4 : canvas.height * .44) + deltaY;
+    btn.x = isMobile.value ? canvas.width  * .1 : canvas.width  * .13;
+    btn.scale = .35 * dpr;
+
+    // === Custom hit area ===
+    let hit = new createjs.Shape();
+    hit.graphics.beginFill("#000").drawRect(0, 0, sukukataArr[i].width, sukukataArr[i].height);
+    hit.alpha = 0.01;
+    btn.hitArea = hit;
+
+    // Required: set bounds so CreateJS knows the hit area size
+    btn.setBounds(0, 0, sukukataArr[i].width, sukukataArr[i].height);
+
+
     // Add event listeners for hover and click
     btn.on("mouseover", () => {
       btn.gotoAndStop("hover");
@@ -1234,17 +1251,63 @@ function initButtons(){
 }
 
 function outputSound(){
-
+  /*
+  * output the sound from the complete combination of sukukata and last letter
+  * */
+  if(displayedSukukata && displayedLastLetter){
+    if (playingSound) {
+      playingSound.stop();
+      playingSound = null;
+    }
+    playingSound = createjs.Sound.play(`sound_${displayedSukukata}${displayedLastLetter}`);
+  }
 }
-function displayLastLetter(){
+function displayLastLetter(letter){
   /*
   * display the last letter clicked on keyboard onto the monitor
   * */
+  if(displayedLastLetterElement){
+    stage.removeChild(displayedLastLetterElement);
+    displayedLastLetter = "";
+  }
+  let text = new createjs.Text(letter, "120px MyLexics", "#000"); // size and color
+  text.x = isMobile.value ? canvas.width * .66: canvas.width * .56;
+  text.y = isMobile.value ? canvas.height * .36 : canvas.height * .36;
+  // Add to stage and update
+  stage.addChild(text);
+  stage.update();
+  displayedLastLetterElement = text;
+  displayedLastLetter = letter;
 }
-function displaySukukata(){
+function displaySukukata(sukukata){
   /*
   * display the sukukata clicked on keyboard onto the monitor
   * */
+  if(displayedSukukataElement){
+    stage.removeChild(displayedSukukataElement);
+    displayedSukukata = "";
+  }
+  if(displayedLastLetterElement){
+    stage.removeChild(displayedLastLetterElement);
+    displayedLastLetter = "";
+  }
+  let text = new createjs.Text(sukukata, "120px MyLexics", "#000"); // size and color
+  text.x = isMobile.value ? canvas.width * .54 : canvas.width * .48;
+  text.y = canvas.height * .36;
+  // Add to stage and update
+  stage.addChild(text);
+  stage.update();
+  displayedSukukataElement = text;
+  displayedSukukata = sukukata;
+}
+
+function hideDisplayedSukukataLetter(){
+  stage.removeChild(displayedSukukataElement);
+  stage.removeChild(displayedLastLetterElement);
+  displayedSukukataElement = null;
+  displayedLastLetterElement = null;
+  displayedSukukata = "";
+  displayedLastLetter = "";
 }
 function navigateToAnotherPage(direction){
   /*
@@ -1258,7 +1321,7 @@ function navigateToAnotherPage(direction){
   if(direction === "next"){
     if(currentPage >= 1 && currentPage < sukukata.length){
       hideDisplayButtons();
-      addPreviousButton();
+      hideDisplayedSukukataLetter();
       currentPage++;
       initButtons();
     }
@@ -1268,12 +1331,12 @@ function navigateToAnotherPage(direction){
   }else if(direction === "previous"){
     if(currentPage > 1 && currentPage <= sukukata.length){
       hideDisplayButtons();
+      hideDisplayedSukukataLetter();
       currentPage--;
       initButtons();
     }
     else if(currentPage === 1){
-      //hide the previous button
-      hidePreviousButton();
+      router.push({name: 'SukukataKv'});
     }
   }
 }
@@ -1284,7 +1347,6 @@ function hideDisplayButtons(){
   displayedButtons.forEach((btn) => {
     stage.removeChild(btn);
   });
-
 }
 function addPreviousButton(){
   if(!btnPrevious){
@@ -1312,24 +1374,18 @@ function addPreviousButton(){
       btnPrevious.gotoAndStop("hover");
     });
     btnPrevious.on("mouseout", () => {
-      btnPrevious.gotoAndStop("normal");
+      btnPrevious?.gotoAndStop("normal");
     });
     btnPrevious.on("click", () => {
       btnPrevious.gotoAndStop("hover");
       setTimeout(() => {
-        btnPrevious.gotoAndStop("normal");
+        btnPrevious?.gotoAndStop("normal");
       }, 200);
       navigateToAnotherPage("previous");
     });
     stage.addChild(btnPrevious);
   }
 }
-function hidePreviousButton(){
-  if(btnPrevious){
-    stage.removeChild(btnPrevious);
-  }
-}
-
 function playSound(sound){
   if (playingSound) {
     playingSound.stop();
