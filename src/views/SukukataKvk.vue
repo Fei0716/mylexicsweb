@@ -24,7 +24,8 @@ let isMobile = computed(()=>{
 });
 let targetWidth = isMobile.value ? 675: 1000;
 let targetHeight = isMobile.value ? 800 : 675;
-const dpr = window.devicePixelRatio || 1;
+// const dpr = window.devicePixelRatio || 1;
+const dpr = 1.25;
 // objects
 let backgroundImg;
 let title;
@@ -1217,7 +1218,6 @@ function initButtons(){
     btn.y = (isMobile.value? canvas.height * .4 : canvas.height * .44) + deltaY;
     btn.x = isMobile.value ? canvas.width  * .1 : canvas.width  * .13;
     btn.scale = .35 * dpr;
-
     // === Custom hit area ===
     let hit = new createjs.Shape();
     hit.graphics.beginFill("#000").drawRect(0, 0, sukukataArr[i].width, sukukataArr[i].height);

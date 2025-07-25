@@ -30,6 +30,9 @@ function nextPage(){
     case "SukukataKvk":
       router.push({name: 'LamanPerkataan'});
       break;
+    case "KenaliPerkataan":
+      router.push({name: 'KeluargaPerkataan'});
+      break;
     default:break;
   }
 }

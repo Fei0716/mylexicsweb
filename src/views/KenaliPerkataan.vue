@@ -9,14 +9,13 @@ let stage;
 let queue;
 let playingSound = null;
 let playingAnimation = null;
-let keyboardButtons = [];
 let displayedButtons = [];
-let displayedLastLetterElement = null;//store the createJs text element
-let displayedSukukataElement = null;
-let displayedLastLetter = "";//store the string
-let displayedSukukata = "";
+let displayedWordButtons = [];
+let displayedText = null;
+let displayedWordImage = null;
 
 let currentPage = 1;
+let currentLetter = 1;//showing the first letter of the current page
 let showModalContinue = ref(false);
 let isLoading = ref(true);
 let isMobile = computed(()=>{
@@ -24,7 +23,8 @@ let isMobile = computed(()=>{
 });
 let targetWidth = isMobile.value ? 675: 1000;
 let targetHeight = isMobile.value ? 800 : 675;
-const dpr = window.devicePixelRatio || 1;
+// const dpr = window.devicePixelRatio || 1;
+const dpr = 1.25;
 // objects
 let backgroundImg;
 let title;
@@ -423,6 +423,299 @@ let perkataan = [
         width: 279,
         height: 193,
       },
+    ],
+    [
+      {
+        letter: "o",
+        words: [
+          {
+            word: "obor",
+            width: 242,
+            height: 209,
+          },
+          {
+            word: "oren",
+            width: 218,
+            height: 206,
+          },
+          {
+            word: "otak",
+            width: 230,
+            height: 216,
+          },
+          {
+            word: "otot",
+            width: 217,
+            height: 211,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+      {
+        letter: "p",
+        words: [
+          {
+            word: "padi",
+            width: 252,
+            height: 219,
+          },
+          {
+            word: "paku",
+            width: 218,
+            height: 208,
+          },
+          {
+            word: "pipi",
+            width: 221,
+            height: 220,
+          },
+          {
+            word: "pos",
+            width: 224,
+            height: 216,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+      {
+        letter: "q",
+        words: [
+          {
+            word: "qari",
+            width: 238,
+            height: 287,
+          },
+          {
+            word: "qariah",
+            width: 217,
+            height: 207,
+          },
+          {
+            word: "quran",
+            width: 223,
+            height: 206,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+      {
+        letter: "r",
+        words: [
+          {
+            word: "raja",
+            width: 218,
+            height: 268,
+          },
+          {
+            word: "roda",
+            width: 218,
+            height: 206,
+          },
+          {
+            word: "ros",
+            width: 218,
+            height: 224,
+          },
+          {
+            word: "rusa",
+            width: 218,
+            height: 253,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+      {
+        letter: "s",
+        words: [
+          {
+            word: "sari",
+            width: 221,
+            height: 230,
+          },
+          {
+            word: "siku",
+            width: 235,
+            height: 249,
+          },
+          {
+            word: "sup",
+            width: 262,
+            height: 206,
+          },
+          {
+            word: "susu",
+            width: 218,
+            height: 206,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+      {
+        letter: "t",
+        words: [
+          {
+            word: "tali",
+            width: 218,
+            height: 206,
+          },
+          {
+            word: "tebu",
+            width: 218,
+            height: 214,
+          },
+          {
+            word: "tin",
+            width: 218,
+            height: 206,
+          },
+          {
+            word: "topi",
+            width: 238,
+            height: 206,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+      {
+        letter: "u",
+        words: [
+          {
+            word: "ubat",
+            width: 246,
+            height: 206,
+          },
+          {
+            word: "ubi",
+            width: 226,
+            height: 206,
+          },
+          {
+            word: "ular",
+            width: 218,
+            height: 206,
+          },
+          {
+            word: "ulat",
+            width: 243,
+            height: 206,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+    ],
+    [
+      {
+        letter: "v",
+        words: [
+          {
+            word: "van",
+            width: 220,
+            height: 212,
+          },
+          {
+            word: "vas",
+            width: 217,
+            height: 206,
+          },
+          {
+            word: "video",
+            width: 240,
+            height: 206,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+      {
+        letter: "w",
+        words: [
+          {
+            word: "wang",
+            width: 257,
+            height: 206,
+          },
+          {
+            word: "wap",
+            width: 217,
+            height: 206,
+          },
+          {
+            word: "wau",
+            width: 234,
+            height: 226,
+          },
+          {
+            word: "wisel",
+            width: 233,
+            height: 206,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+      {
+        letter: "x",
+        words: [
+          {
+            word: "xray",
+            width: 218,
+            height: 206,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+      {
+        letter: "y",
+        words: [
+          {
+            word: "yak",
+            width: 225,
+            height: 206,
+          },
+          {
+            word: "yoyo",
+            width: 252,
+            height: 228,
+          },
+          {
+            word: "yu",
+            width: 229,
+            height: 259,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
+      {
+        letter: "z",
+        words: [
+          {
+            word: "zip",
+            width: 241,
+            height: 222,
+          },
+          {
+            word: "zirafah",
+            width: 232,
+            height: 222,
+          },
+          {
+            word: "zoo",
+            width: 236,
+            height: 230,
+          },
+        ],
+        width: 279,
+        height: 193,
+      },
     ]
 
 ]
@@ -430,8 +723,28 @@ let perkataan = [
 const generateAssets = (arr) => {
   let assets = []
   arr.forEach((page)=>{
+    page.forEach((x) =>{
+      //add the letter buttons
+      assets.push({ id: `btn_${x.letter}_01`, src: `/images/perkataan/kenali_perkataan/${x.letter}/${x.letter}0001.png` });
+      assets.push({ id: `btn_${x.letter}_02`, src: `/images/perkataan/kenali_perkataan/${x.letter}/${x.letter}0002.png` });
 
-  });
+      //add the x.letter's sound
+      assets.push({ id: `sound_${x.letter}`, src: `/sounds/perkataan/kenali_perkataan/${x.letter}.mp3` });
+
+      x.words.forEach((y)=>{
+        //add the word buttons
+        assets.push({ id: `btn_${y.word}_01`, src: `/images/perkataan/kenali_perkataan/${x.letter}/btn_${y.word}_01.png` });
+        assets.push({ id: `btn_${y.word}_02`, src: `/images/perkataan/kenali_perkataan/${x.letter}/btn_${y.word}_02.png` });
+
+        //add the text
+        assets.push({ id: `text_${y.word}`, src: `/images/perkataan/kenali_perkataan/${x.letter}/text_${y.word}.png` });
+
+        //add the y.word's sound
+        assets.push({ id: `sound_${y.word}`, src: `/sounds/perkataan/kenali_perkataan/${y.word}.mp3` });
+      });
+    })
+
+    });
   return assets;
 }
 const assetsArr = generateAssets(perkataan);
@@ -529,16 +842,16 @@ function loadScene(){
   //add the pondok
   pondok = new createjs.Bitmap(queue.getResult("pondok"));
   pondok.regX = pondok.image.width / 2;
-  pondok.x = isMobile.value ?  canvas.width * .6: canvas.width * .6;
-  pondok.y = isMobile.value ? canvas.height * .18  :canvas.height * .18;
-  pondok.scale = isMobile.value ? .35 * dpr: .35 * dpr;
+  pondok.x = isMobile.value ?  canvas.width * .7: canvas.width * .6;
+  pondok.y = isMobile.value ? canvas.height * .23  :canvas.height * .18;
+  pondok.scale = isMobile.value ? .3 * dpr: .35 * dpr;
   stage.addChild(pondok);
 
   //add the pokok
   pokok = new createjs.Bitmap(queue.getResult("pokok"));
   pokok.regX = pokok.image.width / 2;
-  pokok.x = isMobile.value ?  canvas.width * .18: canvas.width * .18;
-  pokok.y = isMobile.value ? canvas.height * .08  :canvas.height * .08;
+  pokok.x = isMobile.value ?  canvas.width * .23: canvas.width * .18;
+  pokok.y = isMobile.value ? canvas.height * .15  :canvas.height * .08;
   pokok.scale = isMobile.value ? .3 * dpr: .35 * dpr;
   stage.addChild(pokok);
 
@@ -793,73 +1106,25 @@ function loadScene(){
   stage.addChild(btnNext);
   stage.addChild(btnSubmenu);//required because the button will be covered the letter
 
-  // initKeyboardButtons();
-  // initButtons();
-  // addPreviousButton();
-}
-function initKeyboardButtons(){
-  sukukata.forEach((page)=>{
-    //add the keyboard button for each of the letters
-    if(!page.hideOnKeyboard){
-      let btnSpriteSheet = new createjs.SpriteSheet({
-        images: [
-          queue.getResult(`btn_keyboard_${page.letter}_01`), // Normal state
-          queue.getResult(`btn_keyboard_${page.letter}_02`), // Hover
-          queue.getResult(`btn_keyboard_${page.letter}_03`),  // Click
-        ],
-        frames: { width: 174, height: 183 }, // Adjust size as needed
-        animations: {
-          normal: 0,
-          hover: 1,
-          click: 2,
-        }
-      });
-      // Create the Sprite
-      let btn = new createjs.Sprite(btnSpriteSheet, "normal");
-      btn.mouseEnabled = true;
-      btn.mouseChildren = true;
-      btn.cursor = "pointer";
-      btn.y = canvas.height * page.y ;
-      btn.x = canvas.width * page.x;
-      btn.scale = .35 * dpr; // Apply scaling
-
-      // Add event listeners for hover and click
-      btn.on("mouseover", () => {
-        btn.gotoAndStop("hover");
-      });
-      btn.on("mouseout", () => {
-        btn.gotoAndStop("normal");
-      });
-      btn.on("click", () => {
-        btn.gotoAndStop("click");
-        setTimeout(() => {
-          btn.gotoAndStop("normal");
-        }, 200);
-
-        displayLastLetter(page.letter);
-      });
-
-      stage.addChild(btn);
-    }
-
-  });
+  initButtons();
+  initPerkataanButtons();
+  displayTextImage(perkataan[currentPage - 1][0].words[0].word, false);
 }
 function initButtons(){
-  let sukukataPage = sukukata[currentPage - 1];
-  let sukukataArr = sukukataPage.sukukata_arr;
-  let deltaY = 0;
-  for(let i= 0; i < sukukataArr.length;i++){
+  //
+  let currentPageLetters = perkataan[currentPage - 1];
+  let deltaX = 0;
+  for(let i= 0; i < currentPageLetters.length;i++){
     let btnSpriteSheet = new createjs.SpriteSheet({
       images: [
-        queue.getResult(`btn_${sukukataArr[i].sukukata}_01`), // Normal state
-        queue.getResult(`btn_${sukukataArr[i].sukukata}_02`), // Hover state
-        queue.getResult(`btn_${sukukataArr[i].sukukata}_03`), // Click state
+        queue.getResult(`btn_${currentPageLetters[i].letter}_01`), // Normal state
+        queue.getResult(`btn_${currentPageLetters[i].letter}_02`), // Hover state
       ],
-      frames: { width: sukukataArr[i].width, height: sukukataArr[i].height},
+      frames: { width: currentPageLetters[i].width, height: currentPageLetters[i].height},
       animations: {
         normal: 0,
         hover: 1,
-        click: 2,
+        // click: 2,
       }
     });
     // Create the Sprite
@@ -867,19 +1132,18 @@ function initButtons(){
     btn.mouseEnabled = true;
     btn.mouseChildren = true;
     btn.cursor = "pointer";
-    btn.y = (isMobile.value? canvas.height * .4 : canvas.height * .44) + deltaY;
-    btn.x = isMobile.value ? canvas.width  * .1 : canvas.width  * .13;
-    btn.scale = .35 * dpr;
+    btn.y = isMobile.value? canvas.height * .77 : canvas.height * .88 ;
+    btn.x = isMobile.value ? canvas.width  * .06  + deltaX : canvas.width  * .08 + deltaX;
+    btn.scale = isMobile.value ? .3 * dpr  :  .35 * dpr;
 
     // === Custom hit area ===
     let hit = new createjs.Shape();
-    hit.graphics.beginFill("#000").drawRect(0, 0, sukukataArr[i].width, sukukataArr[i].height);
+    hit.graphics.beginFill("#000").drawRect(0, 0, currentPageLetters[i].width, currentPageLetters[i].height);
     hit.alpha = 0.01;
     btn.hitArea = hit;
 
     // Required: set bounds so CreateJS knows the hit area size
-    btn.setBounds(0, 0, sukukataArr[i].width, sukukataArr[i].height);
-
+    btn.setBounds(0, 0, currentPageLetters[i].width, currentPageLetters[i].height);
 
     // Add event listeners for hover and click
     btn.on("mouseover", () => {
@@ -893,75 +1157,136 @@ function initButtons(){
       setTimeout(() => {
         btn.gotoAndStop("normal");
       }, 200);
-
-      displaySukukata(sukukataArr[i].sukukata);
+      outputSound(currentPageLetters[i].letter);//output the sound of the letter
+      currentLetter = i + 1;
+      navigateToAnotherLetter(currentPageLetters[i]);
     });
     stage.addChild(btn);
     displayedButtons.push(btn);
 
-    deltaY += 60;
+    deltaX +=  isMobile.value ? 110 : 130;
   }
 }
 
-function outputSound(){
+function initPerkataanButtons() {
   /*
-  * output the sound from the complete combination of sukukata and last letter
+  * initialize the perkataan buttons on the tree
   * */
-  if(displayedSukukata && displayedLastLetter){
-    if (playingSound) {
-      playingSound.stop();
-      playingSound = null;
-    }
-    playingSound = createjs.Sound.play(`sound_${displayedSukukata}${displayedLastLetter}`);
-  }
+  let currentPageLetters = perkataan[currentPage - 1];
+  let currentPageWords = currentPageLetters[currentLetter - 1];
+  let positions = [
+    {x: isMobile.value ? .19 : .15, y: isMobile.value ? .36 : .37},//first word button's position on the tree
+    {x: isMobile.value ? .09: .08, y: isMobile.value ? .46 : .51},
+    {x: isMobile.value ? .29 : .23, y: isMobile.value ? .48 : .53},
+    {x: isMobile.value ? .19 : .15, y: isMobile.value ? .57 : .67},
+  ]
+
+  currentPageWords.words.forEach((x, index) => {
+    let word = x.word;
+    let btnSpriteSheet = new createjs.SpriteSheet({
+      images: [
+        queue.getResult(`btn_${word}_01`), // Normal state
+        queue.getResult(`btn_${word}_02`), // Hover state
+      ],
+      frames: { width: x.width, height: x.height},
+      animations: {
+        normal: 0,
+        hover: 1,
+        // click: 2,
+      }
+    });
+    // Create the Sprite
+    let btn = new createjs.Sprite(btnSpriteSheet, "normal");
+    btn.mouseEnabled = true;
+    btn.mouseChildren = true;
+    btn.cursor = "pointer";
+    btn.x = canvas.width * positions[index].x;
+    btn.y = canvas.height * positions[index].y;
+    btn.scale = isMobile.value ? .26 * dpr : .3 * dpr;
+
+    // === Custom hit area ===
+    let hit = new createjs.Shape();
+    hit.graphics.beginFill("#000").drawRect(0, 0, x.width, x.height);
+    hit.alpha = 0.01;
+    btn.hitArea = hit;
+
+    // Required: set bounds so CreateJS knows the hit area size
+    btn.setBounds(0, 0, x.width, x.height);
+
+    // Add event listeners for hover and click
+    btn.on("mouseover", () => {
+      btn.gotoAndStop("hover");
+    });
+    btn.on("mouseout", () => {
+      btn.gotoAndStop("normal");
+    });
+    btn.on("click", () => {
+      btn.gotoAndStop("click");
+      setTimeout(() => {
+        btn.gotoAndStop("normal");
+      }, 200);
+      displayTextImage(word,true);
+
+    });
+    stage.addChild(btn);
+    displayedWordButtons.push(btn);
+  });
+
 }
-function displayLastLetter(letter){
+function displayTextImage(word, outputWordSound){
   /*
-  * display the last letter clicked on keyboard onto the monitor
+  * display text and word image on the pondok
   * */
-  if(displayedLastLetterElement){
-    stage.removeChild(displayedLastLetterElement);
-    displayedLastLetter = "";
-  }
-  let text = new createjs.Text(letter, "120px MyLexics", "#000"); // size and color
-  text.x = isMobile.value ? canvas.width * .66: canvas.width * .56;
-  text.y = isMobile.value ? canvas.height * .36 : canvas.height * .36;
-  // Add to stage and update
-  stage.addChild(text);
-  stage.update();
-  displayedLastLetterElement = text;
-  displayedLastLetter = letter;
+  hideTextWordImage();
+
+  //display text
+  displayedText = new createjs.Bitmap(queue.getResult(`text_${word}`));
+  displayedText.regX = displayedText.image.width / 2;
+  displayedText.regY= displayedText.image.height / 2;
+  displayedText.x = isMobile.value ? canvas.width * .65 : canvas.width * .56;
+  displayedText.y = isMobile.value ? canvas.height * .37: canvas.height * .37;
+  displayedText.scale = isMobile.value ? .3 * dpr: .35 * dpr;
+  stage.addChild(displayedText);
+
+  //display word image
+  displayedWordImage = new createjs.Bitmap(queue.getResult(`btn_${word}_01`));
+  displayedWordImage.regX = displayedWordImage.image.width / 2;
+  displayedWordImage.regY= displayedWordImage.image.height / 2;
+  displayedWordImage.x = isMobile.value ? canvas.width * .65 : canvas.width * .56;
+  displayedWordImage.y = isMobile.value ? canvas.height * .57: canvas.height * .6;
+  displayedWordImage.alpha = 0; // Initially hidden
+  displayedWordImage.scale = isMobile.value ? .7 * dpr: .9 * dpr;
+  stage.addChild(displayedWordImage);
+
+  // Apply fade-in animation (0 to 1 alpha in 1 second)
+  createjs.Tween.get(displayedWordImage).to({ alpha: 1 }, 300, createjs.Ease.quadIn);
+
+  //output sound if needed
+  if(outputWordSound)
+    outputSound(word);
+
 }
-function displaySukukata(sukukata){
+function outputSound(word){
   /*
-  * display the sukukata clicked on keyboard onto the monitor
+  * output the sound for specific perkataan
   * */
-  if(displayedSukukataElement){
-    stage.removeChild(displayedSukukataElement);
-    displayedSukukata = "";
+  if (playingSound) {
+    playingSound.stop();
+    playingSound = null;
   }
-  if(displayedLastLetterElement){
-    stage.removeChild(displayedLastLetterElement);
-    displayedLastLetter = "";
-  }
-  let text = new createjs.Text(sukukata, "120px MyLexics", "#000"); // size and color
-  text.x = isMobile.value ? canvas.width * .54 : canvas.width * .48;
-  text.y = canvas.height * .36;
-  // Add to stage and update
-  stage.addChild(text);
-  stage.update();
-  displayedSukukataElement = text;
-  displayedSukukata = sukukata;
+  playingSound = createjs.Sound.play(`sound_${word}`);
+}
+function navigateToAnotherLetter(obj){
+  /*
+  * change to another letter and it set of words
+  * */
+  hideDisplayWordButtons();
+  hideTextWordImage();
+  initPerkataanButtons();
+  displayTextImage(obj.words[0].word, false);
 }
 
-function hideDisplayedSukukataLetter(){
-  stage.removeChild(displayedSukukataElement);
-  stage.removeChild(displayedLastLetterElement);
-  displayedSukukataElement = null;
-  displayedLastLetterElement = null;
-  displayedSukukata = "";
-  displayedLastLetter = "";
-}
+
 function navigateToAnotherPage(direction){
   /*
   * to handle page navigation when clicking on next or previous button
@@ -972,34 +1297,35 @@ function navigateToAnotherPage(direction){
     playingAnimation = null;
   }
   if(direction === "next"){
-    if(currentPage >= 1 && currentPage < sukukata.length){
+    if(currentPage >= 1 && currentPage < perkataan.length){
       hideDisplayButtons();
-      hideDisplayedSukukataLetter();
+      hideDisplayWordButtons();
+      addPreviousButton();
       currentPage++;
+      currentLetter = 1;
       initButtons();
+      initPerkataanButtons();
+      displayTextImage(perkataan[currentPage - 1][0].words[0].word, false);
     }
-    else if(currentPage === sukukata.length){
+    else if(currentPage === perkataan.length){
       navigateToAnotherSubmenu();
     }
   }else if(direction === "previous"){
-    if(currentPage > 1 && currentPage <= sukukata.length){
+    if(currentPage > 1 && currentPage <= perkataan.length){
       hideDisplayButtons();
-      hideDisplayedSukukataLetter();
+      hideDisplayWordButtons();
       currentPage--;
+      currentLetter = 1;
       initButtons();
-    }
-    else if(currentPage === 1){
-      router.push({name: 'SukukataKv'});
+      initPerkataanButtons();
+      displayTextImage(perkataan[currentPage - 1][0].words[0].word, false);
+
+      if(currentPage === 1){
+        stage.removeChild(btnPrevious);
+        btnPrevious = null;
+      }
     }
   }
-}
-function hideDisplayButtons(){
-  /*
-  * remove any sukukata buttons from the previous run
-  * */
-  displayedButtons.forEach((btn) => {
-    stage.removeChild(btn);
-  });
 }
 function addPreviousButton(){
   if(!btnPrevious){
@@ -1038,6 +1364,35 @@ function addPreviousButton(){
     });
     stage.addChild(btnPrevious);
   }
+}
+function hideTextWordImage(){
+  /*
+  * hide the text and word image on the pondok
+  * */
+  if(displayedText || displayedWordImage){
+    stage.removeChild(displayedText);
+    stage.removeChild(displayedWordImage);
+    displayedText = null;
+    displayedWordImage = null;
+  }
+}
+function hideDisplayWordButtons(){
+  /*
+  * remove word buttons for previous letter
+  * */
+  displayedWordButtons.forEach((btn) => {
+    stage.removeChild(btn);
+  });
+  displayedWordButtons = [];
+}
+function hideDisplayButtons(){
+  /*
+  * remove any buttons from the previous run
+  * */
+  displayedButtons.forEach((btn) => {
+    stage.removeChild(btn);
+  });
+  displayedButtons = [];
 }
 function playSound(sound){
   if (playingSound) {
