@@ -717,7 +717,6 @@ let perkataan = [
         height: 193,
       },
     ]
-
 ]
 // generate assets from the array above
 const generateAssets = (arr) => {

@@ -11,6 +11,7 @@ import SukukataKvk from "./views/SukukataKvk.vue";
 import LamanPerkataan from "./views/LamanPerkataan.vue";
 import KenaliPerkataan from "./views/KenaliPerkataan.vue";
 import KeluargaPerkataan from "./views/KeluargaPerkataan.vue";
+import KeluargaPerkataanGroup from "./views/KeluargaPerkataanGroup.vue";
 
 const routes = [
     {
@@ -72,6 +73,11 @@ const routes = [
         path: "/laman-perkataan/keluarga-perkataan",
         name: "KeluargaPerkataan",
         component: KeluargaPerkataan
+    },
+    {
+        path: "/laman-perkataan/keluarga-perkataan/:group",
+        name: "KeluargaPerkataanGroup",
+        component: KeluargaPerkataanGroup
     },
     {
         path: "/:catchAll(.*)",

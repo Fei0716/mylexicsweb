@@ -33,6 +33,9 @@ function nextPage(){
     case "KenaliPerkataan":
       router.push({name: 'KeluargaPerkataan'});
       break;
+    case "KeluargaPerkataanGroup":
+      router.push({name: 'LamanUtama'});
+      break;
     default:break;
   }
 }
