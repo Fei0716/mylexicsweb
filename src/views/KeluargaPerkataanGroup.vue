@@ -11,12 +11,10 @@ let queue;
 let playingSound = null;
 let playingAnimation = null;
 let displayedTextButtons = [];
-let displayedWordButtons = [];
 let displayedText = null;
 let displayedWordImage = null;
 let displayedNumber = null;
 let displayedPen = null;
-
 let showModalContinue = ref(false);
 let isLoading = ref(true);
 let isMobile = computed(()=>{
@@ -32,6 +30,7 @@ let title;
 let camera;
 let btnUp = null;
 let btnDown = null;
+let font = isMobile.value ? "60px MyLexics" :  "70px MyLexics";
 
 let btnHome;
 let btnKeluar;
@@ -453,8 +452,8 @@ function loadScene(){
   //add the camera
   camera = new createjs.Bitmap(queue.getResult("camera"));
   camera.regX = camera.image.width / 2;
-  camera.x = isMobile.value ?  canvas.width * .7: canvas.width * .5;
-  camera.y = isMobile.value ? canvas.height * .23  :canvas.height * .2;
+  camera.x = isMobile.value ?  canvas.width * .5: canvas.width * .5;
+  camera.y = isMobile.value ? canvas.height * .3  :canvas.height * .2;
   camera.scale = isMobile.value ? .3 * dpr: .35 * dpr;
   stage.addChild(camera);
 
@@ -766,9 +765,9 @@ function loadScene(){
   btnDown.mouseEnabled = true;
   btnDown.mouseChildren = true;
   btnDown.cursor = "pointer";
-  btnDown.x = isMobile.value ? canvas.width * .55 :canvas.width * .82;
+  btnDown.x = isMobile.value ? canvas.width * .91 :canvas.width * .82;
   btnDown.y = isMobile.value ?   canvas.height * .6: canvas.height * .6;
-  btnDown.scale = .35 * dpr; // Apply scaling
+  btnDown.scale = isMobile.value ? .3 * dpr :  .35 * dpr; // Apply scaling
   // === Custom hit area ===
   let hit = new createjs.Shape();
   hit.graphics.beginFill("#000").drawRect(0, 0, queue.getResult("btn_down_01").width, queue.getResult("btn_down_01").height);
@@ -809,9 +808,9 @@ function loadScene(){
   btnUp.mouseEnabled = true;
   btnUp.mouseChildren = true;
   btnUp.cursor = "pointer";
-  btnUp.x = isMobile.value ? canvas.width * .55 :canvas.width * .82;
-  btnUp.y = isMobile.value ?   canvas.height * .5: canvas.height * .5;
-  btnUp.scale = .35 * dpr; // Apply scaling
+  btnUp.x =  isMobile.value ? canvas.width * .91 :canvas.width * .82;
+  btnUp.y = isMobile.value ?   canvas.height * .52: canvas.height * .5;
+  btnUp.scale = isMobile.value ? .3 * dpr :  .35 * dpr; // Apply scaling
   //hide the up button initially
   btnUp.visible = false;
 
@@ -840,8 +839,10 @@ function loadScene(){
   });
   stage.addChild(btnUp);
 
-  initTextButtons();
-  // displayTextImage(perkataan[currentPage - 1][0].words[0].word, false);
+
+  document.fonts.load(font).then(() => {
+    initTextButtons(); // Wait until the font finished loading to prevent the subsequent operation taking the default font's width
+  });
 }
 function initTextButtons(){
   /*
@@ -850,14 +851,13 @@ function initTextButtons(){
   let words = keluargaPerkataan[currentPage - 1];
   let deltaY = 0 ;
   for (let i = 0; i < words.length; i++) {
-    let text = new createjs.Text(`${i + 1}. ${words[i].word}`, "70px MyLexics", "#000");
-    text.x = isMobile.value ? canvas.width * .3 : canvas.width * .13;
-    text.y = (isMobile.value ? canvas.height * .3 : canvas.height * .25) + deltaY;
+    let text = new createjs.Text(`${i + 1}. ${words[i].word}`, font, "#000");
+    text.x = isMobile.value ? canvas.width * .02 : canvas.width * .13;
+    text.y = (isMobile.value ? canvas.height * .34 : canvas.height * .25) + deltaY;
 
     // Create a container to hold the text
     let button = new createjs.Container();
     button.addChild(text);
-
     // Set the bounds after the text is added
     button.setBounds(0, 0, text.getMeasuredWidth(), text.getMeasuredHeight());
 
@@ -903,7 +903,7 @@ function initTextButtons(){
     displayedTextButtons.push(button);
 
     // Increment deltaY for the next button's position
-    deltaY += isMobile.value ? 60 : 60;
+    deltaY += isMobile.value ? 50 : 60;
   }
 }
 function displayTextImage(no, word){
@@ -921,8 +921,8 @@ function displayTextImage(no, word){
   displayedText = new createjs.Bitmap(queue.getResult(`text_${word}`));
   displayedText.regX = queue.getResult(`text_${word}`).width / 2;
   displayedText.regY= queue.getResult(`text_${word}`).height / 2;
-  displayedText.x = isMobile.value ? canvas.width * .65 : canvas.width * .58;
-  displayedText.y = isMobile.value ? canvas.height * .77: canvas.height * .77;
+  displayedText.x = isMobile.value ? canvas.width * .61 : canvas.width * .58;
+  displayedText.y = isMobile.value ? canvas.height * .71: canvas.height * .77;
   displayedText.scale = isMobile.value ? .3 * dpr: .35 * dpr;
   displayedText.alpha = 0; // Start with the next text invisible
 
@@ -932,8 +932,8 @@ function displayTextImage(no, word){
   displayedNumber = new createjs.Bitmap(queue.getResult(`${no}`));
   displayedNumber.regX = queue.getResult(`${no}`).width / 2;
   displayedNumber.regY= queue.getResult(`${no}`).height / 2;
-  displayedNumber.x = isMobile.value ? canvas.width * .78 : canvas.width * .78;
-  displayedNumber.y = isMobile.value ? canvas.height * .35: canvas.height * .35;
+  displayedNumber.x = isMobile.value ? canvas.width * .86 : canvas.width * .78;
+  displayedNumber.y = isMobile.value ? canvas.height * .39: canvas.height * .35;
   displayedNumber.scale = isMobile.value ? .3 * dpr: .35 * dpr;
 
   stage.addChild(displayedText);
@@ -975,10 +975,10 @@ function displayTextImage(no, word){
       }
     });
     displayedWordImage = new createjs.Sprite(animationSpriteSheet);
-    displayedWordImage.x = isMobile.value ? canvas.width * .65 : canvas.width * .53;
-    displayedWordImage.y = isMobile.value ? canvas.height * .57: canvas.height * .53;
+    displayedWordImage.x = isMobile.value ? canvas.width * .5 : canvas.width * .58;
+    displayedWordImage.y = isMobile.value ? canvas.height * .52: canvas.height * .53;
     displayedWordImage.alpha = 0; // Initially hidden
-    displayedWordImage.scale = isMobile.value ? .3 * dpr: 1 * dpr;
+    displayedWordImage.scale = isMobile.value ? 1 * dpr: 1 * dpr;
     displayedWordImage.gotoAndPlay("run");
     stage.addChild(displayedWordImage);
 
@@ -990,10 +990,10 @@ function displayTextImage(no, word){
     displayedWordImage = new createjs.Bitmap(queue.getResult(`${word}`));
     displayedWordImage.regX = queue.getResult(`${word}`).width / 2;
     displayedWordImage.regY= queue.getResult(`${word}`).height / 2;
-    displayedWordImage.x = isMobile.value ? canvas.width * .65 : canvas.width * .58;
-    displayedWordImage.y = isMobile.value ? canvas.height * .57: canvas.height * .53;
+    displayedWordImage.x = isMobile.value ? canvas.width * .6 : canvas.width * .58;
+    displayedWordImage.y = isMobile.value ? canvas.height * .53: canvas.height * .53;
     displayedWordImage.alpha = 0; // Initially hidden
-    displayedWordImage.scale = isMobile.value ? .3 * dpr: .35 * dpr;
+    displayedWordImage.scale = isMobile.value ? .25 * dpr: .35 * dpr;
     stage.addChild(displayedWordImage);
 
     // Apply fade-in animation (0 to 1 alpha in 1 second)
@@ -1004,7 +1004,6 @@ function displayTextImage(no, word){
   outputSound(word);
 
 }
-
 function outputSound(word){
   /*
   * output the sound for specific perkataan
@@ -1064,11 +1063,8 @@ function displayPen(textBtn){
 
   // IMPORTANT: Remove any existing tweens first
   createjs.Tween.removeTweens(displayedPen);
-
-  displayedPen.regX = queue.getResult(`pen`).width / 2;
-  displayedPen.regY = queue.getResult(`pen`).height / 2;
-  displayedPen.x = textBtn.hitArea.x + textBounds.width -  10;
-  displayedPen.y = textBtn.hitArea.y + 10; // center vertically
+  displayedPen.x = textBtn.hitArea.x + textBounds.width +  10;
+  displayedPen.y = textBtn.hitArea.y - 30; // center vertically
   displayedPen.scale = isMobile.value ? 0.3 * dpr : 0.35 * dpr;
   stage.addChild(displayedPen);
 

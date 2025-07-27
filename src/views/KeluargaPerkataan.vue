@@ -38,32 +38,32 @@ let keluargaPerkataan = [
   //first item
   {
     word: "buka",
-    x: isMobile.value ? .1 : .1 ,
-    y: isMobile.value ? .25 : .25,
+    x: isMobile.value ? .07 : .1 ,
+    y: isMobile.value ? .28 : .25,
   },
   {
     word: "kaku",
     x: isMobile.value ? .25 : .25,
-    y: isMobile.value ? 25 : .25,
+    y: isMobile.value ? .28 : .25,
   },
   {
     word: "batik",
-    x: isMobile.value ? .4 : .4 ,
-    y: isMobile.value ? 25 : .25,
+    x: isMobile.value ? .43 : .4 ,
+    y: isMobile.value ? .28 : .25,
   },
   {
     word: "batuk",
-    x: isMobile.value ? .55 : .55,
-    y: isMobile.value ? 25 : .25,
+    x: isMobile.value ? .61 : .55,
+    y: isMobile.value ? .28 : .25,
   },
   {
     word: "dakap",
-    x: isMobile.value ? .7 : .7 ,
-    y: isMobile.value ? 25 : .25,
+    x: isMobile.value ? .79 : .7 ,
+    y: isMobile.value ? .28 : .25,
   },
   {
     word: "parut",
-    x: isMobile.value ? .1 : .1 ,
+    x: isMobile.value ? .07  : .1 ,
     y: isMobile.value ? .5 : .5,
   },
   {
@@ -73,43 +73,43 @@ let keluargaPerkataan = [
   },
   {
     word: "kesan",
-    x: isMobile.value ? .4 : .4 ,
+    x: isMobile.value ? .43 : .4 ,
     y: isMobile.value ? .5 : .5,
   },
   {
     word: "canda",
-    x: isMobile.value ? .55 : .55 ,
+    x: isMobile.value ? .61 : .55 ,
     y: isMobile.value ?.5 : .5,
   },
   {
     word: "laksa",
-    x: isMobile.value ? .7 : .7 ,
+    x: isMobile.value ? .79 : .7 ,
     y: isMobile.value ?.5 : .5,
   },
   {
     word: "sampah",
-    x: isMobile.value ? .1 : .1 ,
-    y: isMobile.value ? .75 : .75,
+    x: isMobile.value ? .07 : .1 ,
+    y: isMobile.value ? .72: .75,
   },
   {
     word: "balung",
     x: isMobile.value ? .25: .25 ,
-    y: isMobile.value ?  .75 : .75,
+    y: isMobile.value ?  .72 : .75,
   },
   {
     word: "lotong",
-    x: isMobile.value ? .4 : .4 ,
-    y: isMobile.value ?  .75 : .75,
+    x: isMobile.value ? .43 : .4 ,
+    y: isMobile.value ?  .72 : .75,
   },
   {
     word: "gelama",
-    x: isMobile.value ? .55 : .55 ,
-    y: isMobile.value ?  .75 : .75,
+    x: isMobile.value ? .61 : .55 ,
+    y: isMobile.value ?  .72 : .75,
   },
   {
     word: "meradang",
-    x: isMobile.value ? .68 :  .68 ,
-    y: isMobile.value ?  .75 : .75,
+    x: isMobile.value ? .76 :  .68 ,
+    y: isMobile.value ? .72 : .75,
   },
 ]
 // generate assets from the array above
@@ -448,7 +448,7 @@ function initButtons(){
     btn.cursor = "pointer";
     btn.x = canvas.width * keluargaPerkataan[i].x ;
     btn.y = canvas.height * keluargaPerkataan[i].y ;
-    btn.scale = isMobile.value ? .3 * dpr  :  .35 * dpr;
+    btn.scale = isMobile.value ? .35 * dpr  :  .35 * dpr;
 
     // === Custom hit area ===
     let hit = new createjs.Shape();
