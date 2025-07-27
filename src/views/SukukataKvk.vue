@@ -706,6 +706,12 @@ const generateAssets = (arr) => {
   let assets = []
   arr.forEach((page)=>{
     page.sukukata_arr.forEach((value) =>{
+      //add the keyboard keys
+      for(let i=1; i<=3; i++) {
+        if (!page.hideOnKeyboard) {
+          assets.push({id: `btn_keyboard_${page.letter}_0${i}`, src: `/images/sukukata/kvk/btn_${page.letter}000${i}.png`});
+        }
+      }
       // add the sukukata buttons
       for(let i=1; i<=3; i++){
         assets.push({id: `btn_${value.sukukata}_0${i}`, src: `/images/sukukata/kvk/${page.letter}/${value.sukukata}000${i}.png`});
@@ -724,12 +730,7 @@ const generateAssets = (arr) => {
       });
     })
 
-    //add the keyboard keys
-    for(let i=1; i<=3; i++) {
-      if (!page.hideOnKeyboard) {
-        assets.push({id: `btn_keyboard_${page.letter}_0${i}`, src: `/images/sukukata/kvk/btn_${page.letter}000${i}.png`});
-      }
-    }
+
   });
   return assets;
 }
@@ -788,7 +789,7 @@ function init() {
   queue = new createjs.LoadQueue(false);
   queue.setMaxConnections(10);
   queue.installPlugin(createjs.Sound);
-  queue.on("complete", handleComplete);
+  // queue.on("complete", handleComplete);
   // queue.on("fileload", (event) => {
   //   console.log("✅ Loaded:", event.item.id);
   // });
@@ -796,10 +797,66 @@ function init() {
   // queue.on("error", (event) => {
   //   console.error("❌ Failed to load:", event.data ? event.data.src : "Unknown");
   // });
-  queue.loadManifest(mergedAssetsArr);
-
+  // queue.loadManifest(mergedAssetsArr);
+  // Start batched loading instead of loading all at once
+  loadAssetsInBatches(mergedAssetsArr, 50); // Load 50 assets per batch
 }
+function loadAssetsInBatches(assets, batchSize = 50) {
+  const batches = [];
+  let loadedAssetCount = 0;
+  const totalAssets = assets.length;
 
+  // Split assets into batches
+  for (let i = 0; i < assets.length; i += batchSize) {
+    batches.push(assets.slice(i, i + batchSize));
+  }
+
+  console.log(`Loading ${totalAssets} assets in ${batches.length} batches of ${batchSize}`);
+
+  let currentBatch = 0;
+
+  function loadNextBatch() {
+    if (currentBatch >= batches.length) {
+      console.log("All assets loaded!");
+      handleComplete(); // Call your original complete handler
+      return;
+    }
+
+    const batch = batches[currentBatch];
+
+    // Remove any existing listeners to avoid conflicts
+    queue.removeAllEventListeners("fileload");
+    queue.removeAllEventListeners("complete");
+    queue.removeAllEventListeners("error");
+
+    // Track progress for this batch
+    queue.on("fileload", (event) => {
+      loadedAssetCount++;
+      const progress = Math.round((loadedAssetCount / totalAssets) * 100);
+      console.log(`Loading progress: ${progress}% (${loadedAssetCount}/${totalAssets})`);
+    });
+
+    queue.on("complete", () => {
+      console.log(`Batch ${currentBatch + 1}/${batches.length} completed`);
+      currentBatch++;
+
+      // Small delay between batches to prevent overwhelming the browser
+      setTimeout(() => {
+        loadNextBatch();
+      }, 100);
+    });
+
+    queue.on("error", (event) => {
+      console.error(`Error loading asset in batch ${currentBatch + 1}:`, event.data);
+    });
+
+    console.log(`Loading batch ${currentBatch + 1}/${batches.length} (${batch.length} assets)`);
+    queue.loadManifest(batch);
+  }
+
+  // Start loading the first batch
+  loadNextBatch();
+}
 function handleComplete() {
   isLoading.value = false;
   loadScene();
