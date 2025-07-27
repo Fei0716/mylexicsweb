@@ -802,6 +802,9 @@ function init() {
   loadAssetsInBatches(mergedAssetsArr, 50); // Load 50 assets per batch
 }
 function loadAssetsInBatches(assets, batchSize = 50) {
+  /*
+  * batch loading
+  * */
   const batches = [];
   let loadedAssetCount = 0;
   const totalAssets = assets.length;
@@ -811,13 +814,10 @@ function loadAssetsInBatches(assets, batchSize = 50) {
     batches.push(assets.slice(i, i + batchSize));
   }
 
-  console.log(`Loading ${totalAssets} assets in ${batches.length} batches of ${batchSize}`);
-
   let currentBatch = 0;
 
   function loadNextBatch() {
     if (currentBatch >= batches.length) {
-      console.log("All assets loaded!");
       handleComplete(); // Call your original complete handler
       return;
     }
@@ -833,11 +833,9 @@ function loadAssetsInBatches(assets, batchSize = 50) {
     queue.on("fileload", (event) => {
       loadedAssetCount++;
       const progress = Math.round((loadedAssetCount / totalAssets) * 100);
-      console.log(`Loading progress: ${progress}% (${loadedAssetCount}/${totalAssets})`);
     });
 
     queue.on("complete", () => {
-      console.log(`Batch ${currentBatch + 1}/${batches.length} completed`);
       currentBatch++;
 
       // Small delay between batches to prevent overwhelming the browser
@@ -850,7 +848,6 @@ function loadAssetsInBatches(assets, batchSize = 50) {
       console.error(`Error loading asset in batch ${currentBatch + 1}:`, event.data);
     });
 
-    console.log(`Loading batch ${currentBatch + 1}/${batches.length} (${batch.length} assets)`);
     queue.loadManifest(batch);
   }
 

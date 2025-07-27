@@ -799,7 +799,7 @@ function init() {
   queue = new createjs.LoadQueue(false);
   queue.setMaxConnections(10);
   queue.installPlugin(createjs.Sound);
-  queue.on("complete", handleComplete);
+  // queue.on("complete", handleComplete);
   // queue.on("fileload", (event) => {
   //   console.log("✅ Loaded:", event.item.id);
   // });
@@ -807,10 +807,64 @@ function init() {
   // queue.on("error", (event) => {
   //   console.error("❌ Failed to load:", event.data ? event.data.src : "Unknown");
   // });
-  queue.loadManifest(mergedAssetsArr);
+  // queue.loadManifest(mergedAssetsArr);
 
+  // Start batched loading instead of loading all at once
+  loadAssetsInBatches(mergedAssetsArr, 50); // Load 50 assets per batch
 }
+function loadAssetsInBatches(assets, batchSize = 50) {
+  /*
+  * batch loading
+  * */
+  const batches = [];
+  let loadedAssetCount = 0;
+  const totalAssets = assets.length;
 
+  // Split assets into batches
+  for (let i = 0; i < assets.length; i += batchSize) {
+    batches.push(assets.slice(i, i + batchSize));
+  }
+
+  let currentBatch = 0;
+
+  function loadNextBatch() {
+    if (currentBatch >= batches.length) {
+      handleComplete(); // Call your original complete handler
+      return;
+    }
+
+    const batch = batches[currentBatch];
+
+    // Remove any existing listeners to avoid conflicts
+    queue.removeAllEventListeners("fileload");
+    queue.removeAllEventListeners("complete");
+    queue.removeAllEventListeners("error");
+
+    // Track progress for this batch
+    queue.on("fileload", (event) => {
+      loadedAssetCount++;
+      const progress = Math.round((loadedAssetCount / totalAssets) * 100);
+    });
+
+    queue.on("complete", () => {
+      currentBatch++;
+
+      // Small delay between batches to prevent overwhelming the browser
+      setTimeout(() => {
+        loadNextBatch();
+      }, 100);
+    });
+
+    queue.on("error", (event) => {
+      console.error(`Error loading asset in batch ${currentBatch + 1}:`, event.data);
+    });
+
+    queue.loadManifest(batch);
+  }
+
+  // Start loading the first batch
+  loadNextBatch();
+}
 function handleComplete() {
   isLoading.value = false;
   loadScene();
