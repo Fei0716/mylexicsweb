@@ -1141,8 +1141,12 @@ function loadScene(){
 
   stage.addChild(btnTelinga);
 
-  initKeyboardButtons();
-  initButtons();
+  document.fonts.load("120px MyLexics").then(() => {
+  // Wait until the font finished loading
+    initButtons();
+    initKeyboardButtons();
+  });
+
   addPreviousButton();
 }
 function initKeyboardButtons(){
