@@ -998,7 +998,8 @@ function displayTextImage(no, word){
         .to({ alpha: 0, scaleX: 0, scaleY: 0 }, 1000, createjs.Ease.getPowInOut(4)) // Fade out and scale down
         .call(() => {
           // Once the currentText finishes, remove it from the stage
-          stage.removeChild(previousText);
+          if(stage)
+            stage.removeChild(previousText);
         });
     stage.addChild(previousText);
   }
