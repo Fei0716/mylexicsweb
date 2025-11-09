@@ -50,9 +50,9 @@ function init() {
   }
   stage.canvas.width = Math.round(dpr * targetWidth);
   stage.canvas.height  = Math.round(dpr * targetHeight);
-  // stage.canvas.style.width = `${targetWidth}px`;
-  // stage.canvas.style.height = `${targetHeight}px`;
-  // console.log(stage.canvas.width, stage.canvas.height, dpr);
+  // Set the max time to "catch up" to 50ms (0.05 seconds)
+  // This prevents a massive update if the tab is backgrounded
+  createjs.Ticker.maxDelta = 50;
 
   queue = new createjs.LoadQueue(false);
   queue.setMaxConnections(10);
@@ -108,6 +108,9 @@ function loadScene(){
   /*
   * load up the images
   * */
+  // WIPE the stage clean. This frees all old memory.
+  stage.removeAllChildren();
+
   // Create the sky shape with a radial gradient
   skyImg = new createjs.Shape();
   skyImg.graphics.beginRadialGradientFill(

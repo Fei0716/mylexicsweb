@@ -85,6 +85,9 @@ function init() {
   }
   stage.canvas.width = Math.round(dpr * targetWidth);
   stage.canvas.height  = Math.round(dpr * targetHeight);
+  // Set the max time to "catch up" to 50ms (0.05 seconds)
+  // This prevents a massive update if the tab is backgrounded
+  createjs.Ticker.maxDelta = 50;
 
   queue = new createjs.LoadQueue(false);
   queue.setMaxConnections(10);
@@ -173,6 +176,9 @@ function loadScene(){
   /*
   * load up the images
   * */
+  // WIPE the stage clean. This frees all old memory.
+  stage.removeAllChildren();
+
   kenaliBackgroundImg= new createjs.Bitmap(queue.getResult("kenali_background"));
   // Set registration point to center (better for positioning)
   kenaliBackgroundImg.regX = kenaliBackgroundImg.image.width / 2;

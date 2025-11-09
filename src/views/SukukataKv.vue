@@ -13,6 +13,7 @@ let displayedButtons = [];
 let currentPage = 1;
 let showModalContinue = ref(false);
 let isLoading = ref(true);
+let prebuiltSpriteSheets = {};//filling cabinets use to store heavy SpriteSheets animation
 let isMobile = computed(()=>{
   return  window.innerWidth < 1000 && window.innerWidth < window.innerHeight;
 });
@@ -1026,6 +1027,9 @@ function init() {
   }
   stage.canvas.width = Math.round(dpr * targetWidth);
   stage.canvas.height  = Math.round(dpr * targetHeight);
+  // Set the max time to "catch up" to 50ms (0.05 seconds)
+  // This prevents a massive update if the tab is backgrounded
+  createjs.Ticker.maxDelta = 50;
 
   queue = new createjs.LoadQueue(false);
   queue.setMaxConnections(10);
@@ -1092,6 +1096,26 @@ function loadAssetsInBatches(assets, batchSize = 50) {
 function handleComplete() {
   isLoading.value = false;
   loadScene();
+
+  //prebuilt sprite sheets
+  sukukata.forEach((page) =>{
+      let letter = page.letter;
+      page.sukukata_arr.forEach((sukukataObj, i) =>{
+        let key = sukukataObj.sukukata;
+        prebuiltSpriteSheets[key] = new createjs.SpriteSheet({
+          images: [queue.getResult(`animation_${key}`)],
+          framerate: 30,
+          frames: sukukataObj.frames,
+          animations: {
+            run: [0,sukukataObj.frames.length - 1, "end"],
+            end: [sukukataObj.frames.length - 1,sukukataObj.frames.length - 1],
+            stop: [0]
+          }
+        });
+      })
+  });
+
+
   createjs.Ticker.addEventListener("tick", handleTick);
 }
 
@@ -1105,6 +1129,9 @@ function loadScene(){
   /*
   * load up the images
   * */
+  // WIPE the stage clean. This frees all old memory.
+  stage.removeAllChildren();
+
   backgroundImg= new createjs.Bitmap(queue.getResult("background"));
   // Set registration point to center (better for positioning)
   backgroundImg.regX = backgroundImg.image.width / 2;
@@ -1402,16 +1429,7 @@ function initButtons(){
         playingAnimation = null;
       }
       playSound(`sound_${sukukataArr[i].sukukata}`);
-      let animationSpriteSheet = new createjs.SpriteSheet({
-        images: [queue.getResult(`animation_${sukukataArr[i].sukukata}`)],
-        framerate: 30,
-        frames: sukukataArr[i].frames,
-        animations: {
-          run: [0,sukukataArr[i].frames.length - 1, "end"],
-          end: [sukukataArr[i].frames.length - 1,sukukataArr[i].frames.length - 1],
-          stop: [0]
-        }
-      });
+      let animationSpriteSheet = prebuiltSpriteSheets[sukukataArr[i].sukukata];
       let animation= new createjs.Sprite(animationSpriteSheet);
       // check for specialized value for x and y of animation
       let animationX,animationY;

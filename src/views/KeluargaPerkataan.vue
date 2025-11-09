@@ -163,8 +163,12 @@ function init() {
   } else {
     stage.enableMouseOver(1000); // Keep it for desktop
   }
+
   stage.canvas.width = Math.round(dpr * targetWidth);
   stage.canvas.height  = Math.round(dpr * targetHeight);
+  // Set the max time to "catch up" to 50ms (0.05 seconds)
+  // This prevents a massive update if the tab is backgrounded
+  createjs.Ticker.maxDelta = 50;
 
   queue = new createjs.LoadQueue(false);
   queue.setMaxConnections(10);
@@ -197,6 +201,9 @@ function loadScene(){
   /*
   * load up the images
   * */
+  // WIPE the stage clean. This frees all old memory.
+  stage.removeAllChildren();
+
   backgroundImg= new createjs.Bitmap(queue.getResult("background"));
   // Set registration point to center (better for positioning)
   backgroundImg.regX = backgroundImg.image.width / 2;

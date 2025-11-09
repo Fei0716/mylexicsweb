@@ -9,6 +9,7 @@ let stage;
 let queue;
 let playingSound = null;
 let playingAnimation = null;
+let prebuiltSpriteSheets = {};//filling cabinets use to store heavy SpriteSheets animation
 let displayedKonsonanButtons = [];
 let displayedKonsonanImageButtons = [];
 let displayedImage = null;
@@ -34,7 +35,6 @@ let btnBantuan;
 let btnArahan;
 let btnNext;
 let btnPrevious;
-
 let konsonans = [
     [
       {
@@ -667,6 +667,10 @@ function init() {
   stage.snapToPixelEnabled = true;
   stage.canvas.width = Math.round(dpr * targetWidth);
   stage.canvas.height  = Math.round(dpr * targetHeight);
+  // Set the max time to "catch up" to 50ms (0.05 seconds)
+  // This prevents a massive update if the tab is backgrounded
+  createjs.Ticker.maxDelta = 50;
+
   if (createjs.Touch.isSupported()) {
     createjs.Touch.enable(stage);
     stage.enableMouseOver(0); // Disable mouseover for touch devices
@@ -737,6 +741,24 @@ function loadAssetsInBatches(assets, batchSize = 50) {
 function handleComplete() {
   isLoading.value = false;
   loadScene();
+
+  //prebuilt sprite sheets
+  konsonans.forEach((page) =>{
+    page.forEach((konsonan)=>{
+      let key = konsonan.letter;
+      prebuiltSpriteSheets[key] = new createjs.SpriteSheet({
+          images: [queue.getResult(`${key}_animation`)],
+          framerate: 30,
+          frames: konsonan.frames,
+          animations: {
+            run: [0,konsonan.frames.length - 1, "end"],
+            end: [konsonan.frames.length - 1,konsonan.frames.length - 1],
+            stop: [0]
+          }
+        });
+    });
+  });
+
   createjs.Ticker.addEventListener("tick", handleTick);
 }
 
@@ -750,6 +772,9 @@ function loadScene(){
   /*
   * load up the images
   * */
+  // WIPE the stage clean. This frees all old memory.
+  stage.removeAllChildren();
+
   kenaliBackgroundImg= new createjs.Bitmap(queue.getResult("kenali_background"));
   // Set registration point to center (better for positioning)
   kenaliBackgroundImg.regX = kenaliBackgroundImg.image.width / 2;
@@ -1156,16 +1181,8 @@ function initButtons(){
         playingAnimation = null;
       }
       playSound(`sound_${konsonansArr[i].letter}`);
-      let animationSpriteSheet = new createjs.SpriteSheet({
-        images: [queue.getResult(`${konsonansArr[i].letter}_animation`)],
-        framerate: 30,
-        frames: konsonansArr[i].frames,
-        animations: {
-          run: [0,konsonansArr[i].frames.length - 1, "end"],
-          end: [konsonansArr[i].frames.length - 1,konsonansArr[i].frames.length - 1],
-          stop: [0]
-        }
-      });
+      let animationSpriteSheet = prebuiltSpriteSheets[konsonansArr[i].letter]
+
       let animation= new createjs.Sprite(animationSpriteSheet);
       animation.x = canvas.width * (konsonansArr[i].x ?? (isMobile.value ? .2 :.32));
       animation.y = canvas.height * (konsonansArr[i].y ?? (isMobile.value ? .54 :.55)) ; // Adjust this value if needed
