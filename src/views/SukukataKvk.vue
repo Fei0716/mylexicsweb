@@ -1349,8 +1349,16 @@ function displaySukukata(sukukata){
     stage.removeChild(displayedLastLetterElement);
     displayedLastLetter = "";
   }
+
+  let x = isMobile.value ? canvas.width * .54 : canvas.width * .48;//default horizontal position 
+  
+  //for sukukata m needs to be adjusted slightly left
+  if(sukukata[0] === 'm'){
+    x = isMobile.value ? canvas.width * .52 : canvas.width * .46;
+  }
+
   let text = new createjs.Text(sukukata, "120px MyLexics", "#000"); // size and color
-  text.x = isMobile.value ? canvas.width * .54 : canvas.width * .48;
+  text.x = x;
   text.y = canvas.height * .36;
   // Add to stage and update
   stage.addChild(text);
