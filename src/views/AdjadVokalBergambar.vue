@@ -526,7 +526,10 @@ function loadAssets(letter, word, width, height){
   // Add event listeners for hover and click
   displayedImage.on("mouseover", () => {
     displayedImage.gotoAndStop("hover");
-    playSound(`sound_${letter}`);
+    if(!isMobile.value){
+      //only play sound on desktop when mouseover
+      playSound(`sound_${letter}`);
+    }
   });
   displayedImage.on("mouseout", () => {
     displayedImage.gotoAndStop("normal");
@@ -538,8 +541,33 @@ function loadAssets(letter, word, width, height){
   });
   displayedImage.on("click", () => {
     displayedImage.gotoAndStop("hover");
-    playSound(`sound_${word}`);
+    // Check for touch capability, which is true for BOTH phones AND tablets
+    if (createjs.Touch.isSupported()) {
+        // If another sound is playing (from a previous click), stop it.
+        if (playingSound) {
+            playingSound.stop();
+            playingSound = null;
+        }
+
+        // Play the first sound and store its instance
+        playingSound = createjs.Sound.play(`sound_${letter}`);
+
+        // Add a listener for when the *first* sound finishes
+        playingSound.on("complete", () => {
+            // Now, play the second sound and store *its* instance
+            playingSound = createjs.Sound.play(`sound_${word}`);
+            
+            // Optional: Clear the variable when the second sound is done
+            playingSound.on("complete", () => {
+                playingSound = null;
+            });
+        });
+    }else{
+      //straight away play the word sound when click on pc
+      playSound(`sound_${word}`);
+    }
     displayImageTextOnTv(letter);
+
   });
   stage.addChild(displayedImage);
 
