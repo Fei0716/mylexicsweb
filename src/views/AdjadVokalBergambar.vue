@@ -8,8 +8,7 @@ let canvas;
 let stage;
 let queue;
 let playingSound = null;
-let playingAnimation = null;
-let displayedVokalButtons = [];
+let soundTimer = null;
 let displayedImage = null;
 let displayedText = null;
 let currentPage = 1;
@@ -543,25 +542,32 @@ function loadAssets(letter, word, width, height){
     displayedImage.gotoAndStop("hover");
     // Check for touch capability, which is true for BOTH phones AND tablets
     if (createjs.Touch.isSupported()) {
-        // If another sound is playing (from a previous click), stop it.
-        if (playingSound) {
-            playingSound.stop();
-            playingSound = null;
-        }
+          // If another sound is playing (from a previous click), stop it.
+          if (playingSound) {
+              playingSound.stop();
+              playingSound = null;
+          }
+          //If a delay timer is running, cancel it.
+          if (soundTimer) {
+              clearTimeout(soundTimer);
+              soundTimer = null;
+          }
+          // Play the first sound and store its instance
+          playingSound = createjs.Sound.play(`sound_${letter}`);
 
-        // Play the first sound and store its instance
-        playingSound = createjs.Sound.play(`sound_${letter}`);
-
-        // Add a listener for when the *first* sound finishes
-        playingSound.on("complete", () => {
-            // Now, play the second sound and store *its* instance
-            playingSound = createjs.Sound.play(`sound_${word}`);
-            
-            // Optional: Clear the variable when the second sound is done
-            playingSound.on("complete", () => {
-                playingSound = null;
-            });
-        });
+          // Add a listener for when the *first* sound finishes
+          playingSound.on("complete", () => {
+              playingSound = null; // Clear the first sound
+              soundTimer = setTimeout(()=>{
+                // Now, play the second sound and store *its* instance
+                playingSound = createjs.Sound.play(`sound_${word}`);
+                // Optional: Clear the variable when the second sound is done
+                playingSound.on("complete", () => {
+                    playingSound = null;
+                });
+                soundTimer = null;
+              }, 750);
+          });
     }else{
       //straight away play the word sound when click on pc
       playSound(`sound_${word}`);
