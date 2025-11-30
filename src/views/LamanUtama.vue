@@ -510,16 +510,17 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div id="container">
-    <canvas id="canvas"></canvas>
-  </div>
+    <div class="min-h-screen bg-white w-full body-game">
+      <div id="container">
+        <canvas id="canvas"></canvas>
+      </div>
 
-  <Transition name="fade-in">
-    <ModalPenghargaan @hide="showModalPenghargaan = false;" v-if="showModalPenghargaan"></ModalPenghargaan>
-  </Transition>
+      <Transition name="fade-in">
+        <ModalPenghargaan @hide="showModalPenghargaan = false;" v-if="showModalPenghargaan"></ModalPenghargaan>
+      </Transition>
 
-  <Loader v-if="isLoading"></Loader>
-
+      <Loader v-if="isLoading"></Loader>
+    </div>
 </template>
 
 <style scoped>

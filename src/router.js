@@ -1,4 +1,5 @@
 import {createRouter,createWebHistory} from "vue-router";
+import LandingPage from "./views/LandingPage.vue";
 import LamanUtama from "./views/LamanUtama.vue";
 import LamanAbjad from "./views/LamanAbjad.vue";
 import AbjadVokal from "./views/AbjadVokal.vue";
@@ -16,66 +17,71 @@ import KeluargaPerkataanGroup from "./views/KeluargaPerkataanGroup.vue";
 const routes = [
     {
         path: "/",
+        name: "LandingPage",
+        component: LandingPage
+    },
+    {
+        path: "/app/",
         name: "LamanUtama",
         component: LamanUtama
     },
     {
-        path: "/laman-abjad",
+        path: "/app/laman-abjad",
         name: "LamanAbjad",
         component: LamanAbjad
     },
     {
-        path: "/laman-abjad/vokal",
+        path: "/app/laman-abjad/vokal",
         name: "AbjadVokal",
         component: AbjadVokal
     },
     {
-        path: "/laman-abjad/vokal-bergambar",
+        path: "/app/laman-abjad/vokal-bergambar",
         name: "AbjadVokalBergambar",
         component: AbjadVokalBergambar
     },
     {
-        path: "/laman-abjad/konsonan",
+        path: "/app/laman-abjad/konsonan",
         name: "AbjadKonsonan",
         component:AbjadKonsonan
     },
     {
-        path: "/laman-abjad/konsonan-bergambar",
+        path: "/app/laman-abjad/konsonan-bergambar",
         name: "AbjadKonsonanBergambar",
         component: AbjadKonsonanBergambar
     },
     {
-        path: "/laman-sukukata",
+        path: "/app/laman-sukukata",
         name: "LamanSukukata",
         component: LamanSukukata
     },
     {
-        path: "/laman-sukukata/sukukata-kv",
+        path: "/app/laman-sukukata/sukukata-kv",
         name: "SukukataKv",
         component: SukukataKv
     },
     {
-        path: "/laman-sukukata/sukukata-kvk",
+        path: "/app/laman-sukukata/sukukata-kvk",
         name: "SukukataKvk",
         component: SukukataKvk
     },
     {
-        path: "/laman-perkataan",
+        path: "/app/laman-perkataan",
         name: "LamanPerkataan",
         component: LamanPerkataan
     },
     {
-        path: "/laman-perkataan/kenali-perkataan",
+        path: "/app/laman-perkataan/kenali-perkataan",
         name: "KenaliPerkataan",
         component: KenaliPerkataan
     },
     {
-        path: "/laman-perkataan/keluarga-perkataan",
+        path: "/app/laman-perkataan/keluarga-perkataan",
         name: "KeluargaPerkataan",
         component: KeluargaPerkataan
     },
     {
-        path: "/laman-perkataan/keluarga-perkataan/:group",
+        path: "/app/laman-perkataan/keluarga-perkataan/:group",
         name: "KeluargaPerkataanGroup",
         component: KeluargaPerkataanGroup
     },

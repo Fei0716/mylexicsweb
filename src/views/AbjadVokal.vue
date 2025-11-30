@@ -1843,17 +1843,20 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div id="container">
-    <canvas id="canvas"></canvas>
+  <div class="min-h-screen bg-white w-full body-game">
+    <div id="container">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <Transition name="fade-in">
+      <ModalContinue @hide="showModalContinue = false;" v-if="showModalContinue"></ModalContinue>
+    </Transition>
+    <Transition name="fade-in">
+      <ModalYouSure @hide="showModalYouSure = false;" v-if="showModalYouSure"></ModalYouSure>
+    </Transition>
+    <Loader v-if="isLoading"></Loader>
   </div>
 
-  <Transition name="fade-in">
-    <ModalContinue @hide="showModalContinue = false;" v-if="showModalContinue"></ModalContinue>
-  </Transition>
-  <Transition name="fade-in">
-    <ModalYouSure @hide="showModalYouSure = false;" v-if="showModalYouSure"></ModalYouSure>
-  </Transition>
-  <Loader v-if="isLoading"></Loader>
 </template>
 
 <style scoped>

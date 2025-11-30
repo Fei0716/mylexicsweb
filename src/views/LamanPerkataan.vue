@@ -337,13 +337,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div id="container">
-    <canvas id="canvas"></canvas>
+  <div class="min-h-screen bg-white w-full body-game">
+    <div id="container">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <Loader v-if="isLoading"></Loader>
   </div>
 
-  <Loader v-if="isLoading"></Loader>
 </template>
-
 <style scoped>
 
 
