@@ -30,6 +30,7 @@ let sunImg;
 let btnAbjad;
 let btnSukukata;
 let btnPerkataan;
+let btnAktiviti;
 let btnPenghargaan;
 let snailImg;
 let butterflyImg;
@@ -79,6 +80,7 @@ function init() {
       {id: "sound_abjad", src: "/sounds/sound_abjad.mp3"},
       {id: "sound_sukukata", src: "/sounds/sound_sukukata.mp3"},
       {id: "sound_perkataan", src: "/sounds/sound_perkataan.mp3"},
+      {id: "sound_aktiviti", src: "/sounds/sound_aktiviti.mp3"},
       {id: "sound_penghargaan", src: "/sounds/penghargaan.mp3"},
       {id: "home_deco", src: "/images/home_deco.png"},
       {id: "cloud_formation", src: "/images/cloud_formation.png"},
@@ -232,6 +234,52 @@ function loadScene(){
   sunImg.scale = .3 * dpr; // Apply scaling
 
   stage.addChild(sunImg)
+  let buttonAktivitiSpriteSheet = new createjs.SpriteSheet({
+    images: [
+      queue.getResult("btn_games_01"), // Normal state
+      queue.getResult("btn_games_02")  // Hover / Click state
+    ],
+    frames: { width: queue.getResult("btn_games_01").width, height: queue.getResult("btn_games_01").height }, // Adjust size as needed
+    animations: {
+      normal: 0,
+      hover: 1
+    }
+  });
+  btnAktiviti = new createjs.Sprite(buttonAktivitiSpriteSheet, "normal");
+  btnAktiviti.mouseEnabled = true;
+  btnAktiviti.mouseChildren = true;
+  btnAktiviti.cursor = "pointer";
+  btnAktiviti.y = isMobile.value ? canvas.height * .45 :canvas.height * .4;
+  btnAktiviti.x = isMobile.value ? canvas.width * .6: canvas.width * .6;
+  btnAktiviti.scale = isMobile.value ? 0.3 * dpr : 0.37 * dpr; // Apply scaling
+  // Ensure stage updates
+  stage.update();
+  // Add event listeners for hover and click
+  btnAktiviti.on("mouseover", () => {
+    btnAktiviti.gotoAndStop("hover");
+    // Prevent overlapping sounds
+    if (!playingSound || playingSound.playState === createjs.Sound.PLAY_FINISHED) {
+      playingSound = createjs.Sound.play("sound_aktiviti");
+    }
+  });
+  btnAktiviti.on("mouseout", () => {
+    btnAktiviti.gotoAndStop("normal");
+    //Stop the sound when mouse leaves
+    if (playingSound) {
+      playingSound.stop();
+      playingSound = null;
+    }
+  });
+  btnAktiviti.on("click", () => {
+    btnAktiviti.gotoAndStop("hover");
+    if (playingSound) {
+      playingSound.stop();
+      playingSound = null;
+    }
+    //navigate to the abjad page
+    router.push({name: 'LamanAktiviti'});
+  });
+  stage.addChild(btnAktiviti);
 
   // Define a SpriteSheet with two frames (normal & hover)
   let buttonPerkataanSpriteSheet = new createjs.SpriteSheet({
@@ -249,9 +297,9 @@ function loadScene(){
   btnPerkataan.mouseEnabled = true;
   btnPerkataan.mouseChildren = true;
   btnPerkataan.cursor = "pointer";
-  btnPerkataan.y = canvas.height * .45;
-  btnPerkataan.x = isMobile.value ? canvas.width * .49: canvas.width * .4;
-  btnPerkataan.scale = 0.35 * dpr; // Apply scaling
+  btnPerkataan.y = isMobile.value ? canvas.height * .55 : canvas.height * .45;
+  btnPerkataan.x = isMobile.value ? canvas.width * .4: canvas.width * .4;
+  btnPerkataan.scale = isMobile.value ? 0.28 * dpr:  0.35 * dpr; // Apply scaling
   // Ensure stage updates
   stage.update();
   // Add event listeners for hover and click
@@ -297,9 +345,9 @@ function loadScene(){
   btnSukukata.mouseEnabled = true;
   btnSukukata.mouseChildren = true;
   btnSukukata.cursor = "pointer";
-  btnSukukata.y = canvas.height * .55;
-  btnSukukata.x = isMobile.value ? canvas.width * .25 : canvas.width * .2;
-  btnSukukata.scale = 0.35 * dpr; // Apply scaling
+  btnSukukata.y = isMobile.value ? canvas.height * .63 : canvas.height * .55;
+  btnSukukata.x = isMobile.value ? canvas.width * .20 : canvas.width * .2;
+  btnSukukata.scale = isMobile.value ? 0.28 * dpr:  0.35 * dpr; // Apply scaling
   // Ensure stage updates
   stage.update();
   // Add event listeners for hover and click
@@ -347,9 +395,9 @@ function loadScene(){
   btnAbjad.mouseEnabled = true;
   btnAbjad.mouseChildren = true;
   btnAbjad.cursor = "pointer";
-  btnAbjad.y = canvas.height * .66;
+  btnAbjad.y =isMobile.value ? canvas.height * .75 : canvas.height * .66;
   btnAbjad.x = canvas.width * .01;
-  btnAbjad.scale = 0.35 * dpr; // Apply scaling
+  btnAbjad.scale = isMobile.value ? 0.28 * dpr:  0.35 * dpr; // Apply scaling
   // Ensure stage updates
   stage.update();
   // Add event listeners for hover and click
@@ -430,9 +478,9 @@ function loadScene(){
   stage.addChild(btnPenghargaan);
 
   homeDeco = new createjs.Bitmap(queue.getResult("home_deco"));
-  homeDeco.x = isMobile.value ? canvas.width * .4 : canvas.width * .48;
-  homeDeco.y = isMobile.value ? canvas.height * .45 :  canvas.height * .24;
-  homeDeco.scale = isMobile.value ? 0.5 * dpr :  0.6 * dpr;
+  homeDeco.x = isMobile.value ? canvas.width * .4 : canvas.width * .53;
+  homeDeco.y = isMobile.value ? canvas.height * .32 :  canvas.height * .24;
+  homeDeco.scale = isMobile.value ? 0.6 * dpr :  0.6 * dpr;
   stage.addChild(homeDeco);
 
 
