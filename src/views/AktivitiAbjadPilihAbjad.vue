@@ -3,12 +3,14 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import router from '../router.js';
 import Loader from '../components/Loader.vue';
 import { SceneBuilder } from '../helper.js';
+import ModalRetry from '../components/ModalRetry.vue';
 
 // States
 let canvas;
 let stage;
 let queue;
 const dpr = window.devicePixelRatio || 1;
+let showModalRetry = ref(false);
 // objects
 let builder;
 let backgroundImg;
@@ -68,7 +70,7 @@ let duckFrames = [
     [416, 350, 83, 89, 0, 7, 23],
 ];
 const duckContainer = new createjs.Container();
-const bgScale = isMobile.value ? 0.5 : 0.37;
+const bgScale = isMobile.value ? 0.35 : 0.37;
 const generateAssets = () => {
     let assets = [];
     const vowels = ['a', 'e', 'i', 'o', 'u'];
@@ -134,6 +136,10 @@ const generalAssetsArr = [
         id: 'stage_background',
         src: '/images/aktiviti/abjad/aktiviti_pilih_abjad/stage_background.png',
     },
+    {
+        id: 'board',
+        src: '/images/aktiviti/abjad/aktiviti_pilih_abjad/board.png',
+    },
 
     //  sounds
     { id: 'sound_laman_utama', src: '/sounds/laman_utama.mp3' },
@@ -141,6 +147,14 @@ const generalAssetsArr = [
     {
         id: 'sound_arahan',
         src: '/sounds/aktiviti/abjad/pilih_abjad/arahan.mp3',
+    },
+    {
+        id: 'sound_tahniah',
+        src: '/sounds/aktiviti/tahniah.mp3',
+    },
+    {
+        id: 'sound_maaf',
+        src: '/sounds/aktiviti/abjad/maaf.mp3',
     },
 ];
 const mergedAssetsArr = [...generalAssetsArr, ...assetsArr];
@@ -153,6 +167,7 @@ let progressBar; // The visual bar object
 let progressFill; // The colored part of the bar
 let progressBlockContainer;
 const totalLetters = 26;
+let isAnimating = false;
 
 function init() {
     //get DPI
@@ -308,8 +323,8 @@ function loadScene() {
 
     btnArahan = builder.addSimpleButton(
         'btn_arahan',
-        isMobile.value ? canvas.width * 0.85 : canvas.width * 0.9,
-        canvas.height * 0.23,
+        isMobile.value ? canvas.width * 0.7 : canvas.width * 0.9,
+        isMobile.value ? canvas.height * 0.17 : canvas.height * 0.23,
         isMobile.value ? 0.3 : 0.35,
         'sound_arahan'
     );
@@ -327,33 +342,42 @@ function loadScene() {
     btnEar = builder.addActionButton(
         'btn_ear_01',
         'btn_ear_02',
-        isMobile.value ? canvas.width * 0.85 : canvas.width * 0.9,
-        canvas.height * 0.37,
+        isMobile.value ? canvas.width * 0.87 : canvas.width * 0.9,
+        isMobile.value ? canvas.height * 0.17 : canvas.height * 0.37,
         isMobile.value ? 0.3 : 0.35,
         null,
         () => {
             startGameRound();
         }
     );
-
+    duckContainer.scaleX = dpr;
+    duckContainer.scaleY = dpr;
+    stage.addChild(duckContainer);
     // Ensure the stage updates with the new content
     stage.update();
 }
 
 function startGameRound() {
+    // BLOCK if animation is playing
+    if (isAnimating) return;
+
+    //Check if user just want to rehear the sound of the current target
+    if (currentTarget) {
+        builder.playSound(`sound_${currentTarget}`);
+        return;
+    }
     // 1. Check if game over
     if (remainingLetters.length === 0) {
         alert('Tahniah! Anda telah menamatkan semua huruf!');
         return;
     }
-
     // 2. Pick a random target from the REMAINING letters
     const randomIndex = Math.floor(Math.random() * remainingLetters.length);
     currentTarget = remainingLetters[randomIndex];
 
     // 3. Play the Sound for the target
     // We use the ID format we created in generateAssets: "sound_a", "sound_b" etc.
-    createjs.Sound.play(`sound_${currentTarget}`);
+    builder.playSound(`sound_${currentTarget}`);
 
     // 4. Pick 3 Distractors (Wrong answers)
     const distractors = getDistractors(currentTarget);
@@ -406,36 +430,46 @@ function callDucks(lettersArray) {
     maskRect.graphics.beginFill('#000').drawRect(bgX, bgY, bgWidth, bgHeight);
     duckContainer.mask = maskRect;
 
+    const exitX = bgX - 200; // 200px to the left of the background edge
     // 4. DEFINE DATA
     const positions = [
-        { x: canvas.width * 0.37, y: canvas.height * 0.62 },
-        { x: canvas.width * 0.47, y: canvas.height * 0.52 },
-        { x: canvas.width * 0.51, y: canvas.height * 0.68 },
-        { x: canvas.width * 0.61, y: canvas.height * 0.58 },
+        {
+            x: isMobile.value ? targetWidth * 0.35 : targetWidth * 0.37,
+            y: targetHeight * 0.62,
+        },
+        {
+            x: isMobile.value ? targetWidth * 0.47 : targetWidth * 0.47,
+            y: targetHeight * 0.52,
+        },
+        {
+            x: isMobile.value ? targetWidth * 0.53 : targetWidth * 0.51,
+            y: targetHeight * 0.68,
+        },
+        {
+            x: isMobile.value ? targetWidth * 0.63 : targetWidth * 0.61,
+            y: targetHeight * 0.58,
+        },
     ];
 
     // 5. CREATE & ANIMATE LOOP
-    positions.forEach((data, index) => {
+    positions.forEach((pos, index) => {
         const letter = lettersArray[index];
         const startX = bgX + bgWidth + 150;
 
-        // Create the custom duck object
-        const myDuck = createDuck(letter, startX, data.y, data.x);
+        // 2. PASS 'exitX' TO THE FUNCTION
+        const myDuck = createDuck(letter, startX, pos.y, pos.x, exitX);
 
-        // Add to the MASKED container
         duckContainer.addChild(myDuck);
 
-        // --- INSERT ANIMATION HERE ---
-        // This triggers the movement immediately after creation
         createjs.Tween.get(myDuck)
-            .wait(index * 300) // Stagger start (0ms, 300ms, 600ms...)
+            .wait(index * 300)
             .to({ x: myDuck.targetX }, 1000, createjs.Ease.quartOut);
     });
 }
 /**
  * Creates a Duck + Text, sets up interaction, and returns the Container.
  */
-function createDuck(letter, startX, yPos, targetX) {
+function createDuck(letter, startX, yPos, targetX, exitX) {
     // 1. Create a wrapper container for this specific duck
     // This allows us to move the duck and text together
     const duckWrapper = new createjs.Container();
@@ -457,7 +491,7 @@ function createDuck(letter, startX, yPos, targetX) {
     const duckSprite = new createjs.Sprite(spriteSheet, 'swim');
 
     // Scale the sprite if needed (adjust based on your mobile/desktop logic)
-    const scale = isMobile.value ? 1 : 1.4;
+    const scale = isMobile.value ? 1.45 : 1.45;
     duckSprite.scale = scale;
 
     // Create the letter text
@@ -468,36 +502,59 @@ function createDuck(letter, startX, yPos, targetX) {
     text.y = 31 * scale; // Push it down slightly to sit on the body
 
     duckWrapper.on('mousedown', (evt) => {
-        // Prevent clicking if game logic isn't ready (optional)
+        // 1. Prevent multiple clicks if game is already resolving
+        if (!currentTarget || isAnimating) return;
 
         if (letter === currentTarget) {
-            // --- CORRECT ANSWER ---
-            console.log('Correct!');
+            // --- A. LOCK THE GAME ---
+            // Stop anyone from clicking again immediately
+            const winningLetter = currentTarget; // Save it
+            currentTarget = null; // Lock the game logic
+            isAnimating = true;
 
-            // 1. Play Success Sound (optional)
-            // createjs.Sound.play("sound_correct");
-
-            // 2. Remove this letter from the "ToDo" list
-            const index = remainingLetters.indexOf(currentTarget);
+            // Update the data immediately so the bar fills up
+            const index = remainingLetters.indexOf(winningLetter);
             if (index > -1) remainingLetters.splice(index, 1);
-
-            // 3. Update Progress Bar
             updateProgressBar();
 
-            // 4. Clear Ducks (Fly away or just disappear)
-            // For now, let's just clear them to start next round
-            duckContainer.removeAllChildren();
+            // --- B. FADE OUT LOSERS ---
+            duckContainer.children.forEach((child) => {
+                if (child !== duckWrapper) {
+                    createjs.Tween.get(child).to({ alpha: 0 }, 500);
+                }
+            });
 
-            // 5. Optional: Auto-start next round or wait for Ear click?
-            // Usually better to wait for Ear click or show a "Good Job" animation
+            // --- C. SHOW MODAL (Foreground Action) ---
+            // The callback here controls when the NEXT round starts
+            displayCorrectMessage(winningLetter, () => {
+                isAnimating = false; // Unlock game
+
+                // Check Game Over
+                if (remainingLetters.length === 0) {
+                    showModalRetry.value = true;
+                }
+            });
+
+            // --- D. SWIM AWAY (Background Action) ---
+            // This happens concurrently with the modal!
+            duckSprite.play();
+            createjs.Tween.get(duckWrapper)
+                .to({ x: exitX }, 2500, createjs.Ease.linear) // Slower swim (2.5s) looks better behind modal
+                .call(() => {
+                    // Optional: You can hide the duck once it's off-screen
+                    // just to be clean, but the next round will wipe it anyway.
+                    duckWrapper.visible = false;
+                });
         } else {
-            // --- WRONG ANSWER ---
-            console.log('Wrong!');
+            // 1. Lock game temporarily so they can't click while "Sorry" is playing
+            isAnimating = true;
 
-            // 1. Play "Oops" sound
-            // createjs.Sound.play("sound_wrong");
-
-            // 2. Visual Feedback: Shake the duck or fade it out
+            // 2. Show the Wrong Message Modal
+            displayWrongMessage(() => {
+                // This runs after the "Sorry" sound finishes and modal closes
+                isAnimating = false; // Unlock game so they can try again
+            });
+            // --- WRONG ANSWER (SHAKE) ---
             createjs.Tween.get(duckWrapper)
                 .to({ x: duckWrapper.x - 10 }, 50)
                 .to({ x: duckWrapper.x + 10 }, 50)
@@ -512,14 +569,191 @@ function createDuck(letter, startX, yPos, targetX) {
     return duckWrapper;
 }
 
+function displayCorrectMessage(correctLetter, onFinishedCallback) {
+    // 1. Create a Container for the Modal
+    const modalContainer = new createjs.Container();
+    // Ensure it sits on top of everything
+    stage.addChild(modalContainer);
+
+    // 2. Create Blocking Overlay (Semi-transparent black)
+    // This catches all clicks to prevent interacting with the game behind
+    const overlay = new createjs.Shape();
+    overlay.graphics
+        .beginFill('rgba(0,0,0,0.3)')
+        .drawRect(0, 0, canvas.width, canvas.height);
+    overlay.cursor = 'default';
+    // Empty click listener stops the event from passing through to the stage
+    overlay.on('click', (evt) => {
+        evt.stopPropagation();
+    });
+    modalContainer.addChild(overlay);
+
+    // 3. Setup the Board Background
+    const boardImg = builder.queue.getResult('board');
+    const board = new createjs.Bitmap(boardImg);
+    // Center the board
+    const boardScale = isMobile.value ? 0.4 : 0.4;
+    board.scaleX = board.scaleY = boardScale;
+    const boardW = boardImg.width * boardScale;
+    const boardH = boardImg.height * boardScale;
+    board.x = (canvas.width - boardW) / 2;
+    board.y = (canvas.height - boardH) / 2;
+    modalContainer.addChild(board);
+
+    // --- PHASE 1: TAHNIAH + CLAPPING ---
+
+    // A. "Tahniah" Text
+    const titleText = new createjs.Text(
+        'Tahniah',
+        'bold 60px MyLexics',
+        '#000000'
+    );
+    titleText.textAlign = 'center';
+    titleText.textBaseline = 'middle';
+    titleText.x = canvas.width / 2;
+    titleText.y = board.y + boardH * 0.4;
+    // B. Hands Clapping Animation
+    // NOTE: Adjust 'width' and 'height' below to match your specific sprite frame size
+    const handsClapppingFrames = [
+        [0, 0, 105, 101, 0, 0, 0],
+        [107, 0, 105, 101, 0, 0, 0],
+        [0, 103, 105, 101, 0, 0, 0],
+        [107, 103, 105, 101, 0, 0, 0],
+    ];
+    const spriteSheet = new createjs.SpriteSheet({
+        images: [builder.queue.getResult('hands_clapping')],
+        frames: handsClapppingFrames,
+        animations: {
+            clap: [0, handsClapppingFrames.length - 1, 'clap', 0.5],
+        },
+    });
+    const handsSprite = new createjs.Sprite(spriteSheet, 'clap');
+    const handsScale = isMobile.value ? 1 : 1.25;
+    handsSprite.x = canvas.width * 0.45;
+    handsSprite.y = board.y + boardH * 0.5; // Position at bottom section of board
+    handsSprite.scale = handsScale; // Match board scale
+
+    modalContainer.addChild(titleText, handsSprite);
+    stage.update();
+
+    // C. Play Sound & Wait
+    const tahniahSound = builder.playSound('sound_tahniah');
+
+    // Listen for sound completion to trigger Phase 2
+    tahniahSound.on('complete', () => {
+        // --- PHASE 2: ALPHABET DISPLAY ---
+
+        // 1. Remove Phase 1 elements
+        modalContainer.removeChild(titleText);
+        modalContainer.removeChild(handsSprite);
+
+        // 2. Add Alphabet Text
+        const letterText = new createjs.Text(
+            correctLetter,
+            'bold 150px MyLexics',
+            '#000000'
+        );
+        letterText.textAlign = 'center';
+        letterText.textBaseline = 'middle';
+        letterText.x = canvas.width / 2;
+        letterText.y = board.y + boardH / 2; // Perfectly centered
+
+        modalContainer.addChild(letterText);
+        stage.update();
+
+        // 3. Play Alphabet Sound
+        const letterSound = builder.playSound(`sound_${correctLetter}`);
+
+        // 4. Cleanup & Finish
+        letterSound.on('complete', () => {
+            // Small delay for better pacing
+            setTimeout(() => {
+                stage.removeChild(modalContainer); // Close modal
+
+                // Trigger the callback (The duck swimming away logic)
+                if (onFinishedCallback) {
+                    onFinishedCallback();
+                }
+            }, 500);
+        });
+    });
+}
+
+function displayWrongMessage(onFinishedCallback) {
+    // 1. Create a Container for the Modal
+    const modalContainer = new createjs.Container();
+    // Ensure it sits on top of everything
+    stage.addChild(modalContainer);
+
+    // 2. Create Blocking Overlay (Semi-transparent black)
+    const overlay = new createjs.Shape();
+    overlay.graphics
+        .beginFill('rgba(0,0,0,0.3)')
+        .drawRect(0, 0, canvas.width, canvas.height);
+    overlay.cursor = 'default';
+
+    // Empty click listener stops the event from passing through to the stage
+    overlay.on('click', (evt) => {
+        evt.stopPropagation();
+    });
+    modalContainer.addChild(overlay);
+
+    // 3. Setup the Board Background
+    const boardImg = builder.queue.getResult('board');
+    const board = new createjs.Bitmap(boardImg);
+
+    // Center the board (Same scaling as your Correct Message)
+    const boardScale = isMobile.value ? 0.4 : 0.4;
+    board.scaleX = board.scaleY = boardScale;
+
+    const boardW = boardImg.width * boardScale;
+    const boardH = boardImg.height * boardScale;
+    board.x = (canvas.width - boardW) / 2;
+    board.y = (canvas.height - boardH) / 2;
+
+    modalContainer.addChild(board);
+
+    // 4. Setup the Text
+    // We use \n to create the two-line effect seen in the image
+    const wrongText = new createjs.Text(
+        'maaf..\nSila cuba lagi',
+        'bold 80px MyLexics',
+        '#000000'
+    );
+    wrongText.textAlign = 'center';
+    wrongText.textBaseline = 'middle';
+    wrongText.lineHeight = 100; // Adjust spacing between lines
+    wrongText.x = canvas.width / 2;
+    // Position vertically centered on the board
+    wrongText.y = board.y + boardH * 0.4;
+
+    modalContainer.addChild(wrongText);
+    stage.update();
+
+    // 5. Play Sound & Wait
+    const maafSound = builder.playSound('sound_maaf');
+
+    // 6. Cleanup when sound finishes
+    maafSound.on('complete', () => {
+        // Small delay so the modal doesn't vanish instantly after the word is spoken
+        setTimeout(() => {
+            stage.removeChild(modalContainer); // Close modal
+
+            // Trigger callback (usually to unlock the game state so user can try again)
+            if (onFinishedCallback) {
+                onFinishedCallback();
+            }
+        }, 500);
+    });
+}
 function drawProgressBar() {
     const barContainer = new createjs.Container();
 
     // Dimensions
-    const barWidth = isMobile.value ? canvas.width * 0.9 : canvas.width * 0.7;
+    const barWidth = isMobile.value ? canvas.width * 0.95 : canvas.width * 0.7;
     const barHeight = 50; // Made it taller to match your image
     const barX = (canvas.width - barWidth) / 2;
-    const barY = canvas.height * 0.9; // Position near bottom
+    const barY = isMobile.value ? canvas.height * 0.85 : canvas.height * 0.9; // Position near bottom
 
     // 1. Background (White with Black Border)
     const bg = new createjs.Shape();
@@ -589,7 +823,25 @@ function updateProgressBar() {
 
     stage.update();
 }
+function resetGame() {
+    showModalRetry.value = false;
+    // Reset game state
+    remainingLetters = [];
+    for (let i = 97; i <= 122; i++) {
+        remainingLetters.push(String.fromCharCode(i));
+    }
+    currentTarget = null;
+    isAnimating = false;
+    updateProgressBar();
 
+    // Clear any existing ducks
+    duckContainer.removeAllChildren();
+    stage.update();
+}
+function navigateToSubMenu() {
+    showModalRetry.value = false;
+    router.push({ name: 'LamanAktivitiAbjad' });
+}
 function cleanupCreateJS() {
     if (queue) {
         queue.removeAllEventListeners(); // Remove all event listeners
@@ -628,7 +880,13 @@ onUnmounted(() => {
         <div id="container">
             <canvas id="canvas"></canvas>
         </div>
-
+        <Transition name="fade-in">
+            <ModalRetry
+                @hide="navigateToSubMenu()"
+                @retry="resetGame()"
+                v-if="showModalRetry"
+            ></ModalRetry>
+        </Transition>
         <Loader v-if="isLoading"></Loader>
     </div>
 </template>
